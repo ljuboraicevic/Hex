@@ -10,7 +10,7 @@ public class Hex {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Table table = new Table(7);
+        Table table = new Table(5);
         Player first = new PlayerHuman();
         Player second = new PlayerHuman();
         

@@ -1,7 +1,5 @@
 package hex;
 
-import java.util.ArrayList;
-
 /**
  * The <tt>Game</tt> class represents a single game of Hex.
  * 
@@ -51,6 +49,7 @@ public class Game {
     
     /**
      * Checks who won.
+     * 
      * @return 0 if game is still active, 1 or 2 if first or second player won,
      * respectively
      */
@@ -68,19 +67,35 @@ public class Game {
      * Starts the game. Players take turns until one of them wins.
      */
     public void play() {
+        int winningPlayer = 0;
+        
         //while game isn't over
-        while (whoWon() != 0) {
+        while (winningPlayer == 0) {
             //players take turns based on number of moves played so far
             Coordinate move = players[movesPlayed % 2].makeMove(table);
             
             //players[0]'s mark is 1 and player[1]'s mark is 2
             table.putMark(move, (byte) (movesPlayed % 2 + 1));
             
+            //connect the field to its neighbors of the same color
+            Coordinate[] sameColorNeighbors = findFieldsNeighborsOfSameColor(move);
+            
+            for (Coordinate neighbor: sameColorNeighbors) {
+                unionFind.union(getFieldIndex(move), getFieldIndex(neighbor));
+            }
+            
             //check if added nodes need to get connected
-            connectAddedEdgeInUFIfNecessary(move);
+            if (isFieldOnPlayersEdge(move)) {
+                unionFind.union(getFieldIndex(move), getIndexOfAddedNodeInUF(move));
+            }
             
             movesPlayed++;
+            
+            winningPlayer = whoWon();
         }
+        
+        System.out.println(table);
+        System.out.println("Player " + winningPlayer + " wins!");
     }
     
     /**
@@ -104,28 +119,15 @@ public class Game {
     }
     
     /**
-     * Connects the field to the appropriate added node in union find, if 
-     * necessary.
+     * Calculates index of the field in the union find.
      * 
      * @param c Coordinates of the field
+     * @return Index of the field in the union find
      */
-    private void connectAddedEdgeInUFIfNecessary(Coordinate c) {
-        int size = table.size - 1;
-        int player = movesPlayed % 2;
-        int moveIndex = c.row * size + c.col;
-        
-        if (isFieldOnPlayersEdge(c)) {
-            //for the first player check vertical edges
-            if (player == 0) {
-                unionFind.union(moveIndex, getIndexOfAddedNodeInUF(c));
-            }
-            //for the second player check horizontal edges
-            else {
-                unionFind.union(moveIndex, getIndexOfAddedNodeInUF(c));
-            }
-        }
+    private int getFieldIndex(Coordinate c) {
+        return c.row * table.size + c.col;
     }
-    
+   
     /**
      * Determines added node's index in union find based on the field.
      * 
@@ -134,17 +136,61 @@ public class Game {
      * @return Index of the added edge in union find
      */
     private int getIndexOfAddedNodeInUF(Coordinate c) {
-        int size = table.size - 1;
-        if      (c.row == 0)    { return size - 4; } 
-        else if (c.row == size) { return size - 3; } 
-        else if (c.col == 0)    { return size - 2; }
-        else if (c.col == size) { return size - 1; }
+        int player = movesPlayed % 2;
+        
+        //added node for the up side
+        if      (c.row == 0              && player == 0) { return ufSize - 4;}
+        //added node for the down side
+        else if (c.row == table.size - 1 && player == 0) { return ufSize - 3;}
+        //added node for the left side
+        else if (c.col == 0              && player == 1) { return ufSize - 2;}
+        //added node for the right side
+        else if (c.col == table.size - 1 && player == 1) { return ufSize - 1;}
         
         return 0;
     }
     
-    private ArrayList<Coordinate> findFieldsNeighbors() {
-        ArrayList<Coordinate> result = new ArrayList<>();
+    /**
+     * Finds neighbors of the field.
+     * 
+     * @param c Coordinates of the field
+     * @return Array of coordinates of the neighbors of the field
+     */
+    private Coordinate[] findFieldsNeighborsOfSameColor(Coordinate c) {
+        byte color = table.matrix[c.row][c.col];
+        
+        //list of all possible neighbors, even the illegal ones
+        Coordinate[] neighbors = new Coordinate[6];
+        neighbors[0] = new Coordinate(c.row - 1, c.col    );
+        neighbors[1] = new Coordinate(c.row - 1, c.col + 1);
+        neighbors[2] = new Coordinate(c.row,     c.col - 1);
+        neighbors[3] = new Coordinate(c.row,     c.col + 1);
+        neighbors[4] = new Coordinate(c.row + 1, c.col - 1);
+        neighbors[5] = new Coordinate(c.row + 1, c.col    );
+        
+        //remove illegal neighbors & neighbors of different color (very racist)
+        int nullCount = 0;
+        for (int iCount = 0; iCount < 6; iCount++) {
+            Coordinate n = neighbors[iCount];
+            if (n.row < 0 || n.row >= table.size 
+                    || n.col < 0 || n.col >= table.size 
+                    || table.matrix[n.row][n.col] != color) {
+                neighbors[iCount] = null;
+                nullCount++;
+            }
+        }
+        
+        //create a new array without null values and return that array
+        Coordinate[] result = new Coordinate[6 - nullCount];
+        int resultCount = 0;
+        
+        for (int iCount = 0; iCount < 6; iCount++) {
+            Coordinate n = neighbors[iCount];
+            if (n == null) { continue; }
+            result[resultCount] = n;
+            resultCount++;
+        }
+        
         return result;
     }
 }
