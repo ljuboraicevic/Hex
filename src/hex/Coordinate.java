@@ -1,7 +1,9 @@
 package hex;
 
 /**
- *
+ * Class Coordinate represents row and column coordinates of a single field on
+ * the table.
+ * 
  * @author Ljubo Raicevic <rljubo90@gmail.com>
  */
 public final class Coordinate {
