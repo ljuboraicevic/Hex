@@ -24,7 +24,7 @@ public class Table {
     int size;
 
     /**
-     * Initializes a Table.
+     * Initializes an empty Table.
      * 
      * @param size Table size
      */
