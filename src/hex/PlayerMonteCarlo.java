@@ -106,14 +106,4 @@ public class PlayerMonteCarlo implements Player {
         }
     }
 
-//    public static void main(String[] args) {
-//        for (int i = 1; i < 10; i++) {
-//            String filename = "input"+i+".txt";
-//            Table t = new Table(filename);
-//            PlayerMonteCarlo pmc = new PlayerMonteCarlo();
-//            System.out.println(t);
-//            System.out.println("Player1 won: "+pmc.didIWin(t, (byte) 0));
-//            System.out.println("Player2 won: "+pmc.didIWin(t, (byte) 1));
-//        }
-//    }
 }
