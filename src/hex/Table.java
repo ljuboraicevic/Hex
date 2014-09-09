@@ -28,6 +28,11 @@ public class Table {
      * Table side size.
      */
     int size;
+    
+    /**
+     * Player who has the next move. First player = 0, second = 1.
+     */
+    private byte nextMovePlayer;
 
     /**
      * Initializes an empty Table.
@@ -38,6 +43,7 @@ public class Table {
         this.matrix = new byte[size][size];
         this.size = size;
         this.noOfEmptyFields = size * size;
+        this.nextMovePlayer = 0;
     }
 
     /**
@@ -47,6 +53,7 @@ public class Table {
      */
     public Table(String filename) {
         try {
+            this.nextMovePlayer = 0;
             Scanner scan = new Scanner(new File(filename));
             this.size = scan.nextInt();
             this.matrix = new byte[size][size];
@@ -73,6 +80,7 @@ public class Table {
         if (!isFieldMarked(c)) {
             matrix[c.row][c.col] = mark;  //mark it
             noOfEmptyFields--;
+            nextMovePlayer = (byte) ((nextMovePlayer + 1) % 2);
             return true;
         }
 
@@ -80,22 +88,28 @@ public class Table {
         return false;
     }
 
+    public byte whosOnTheMove() {
+        return nextMovePlayer;
+    }
+    
     /**
-     * Returns an ArrayList with coordinates of empty fields on the table.
+     * Returns an array with coordinates of empty fields on the table.
      * O(size^2)
      *
      * @return coordinates of empty fields
      */
-    public ArrayList<Coordinate> getEmptyFields() {
-        ArrayList<Coordinate> result = new ArrayList<>();
+    public Coordinate[] getEmptyFields() {
+        Coordinate[] result = new Coordinate[noOfEmptyFields];
 
+        int count = 0;
         //for each field on the table
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
 
                 //if the field is empty, add it
                 if (matrix[row][col] == 0) {
-                    result.add(new Coordinate(row, col));
+                    result[count] = new Coordinate(row, col);
+                    count++;
                 }
             }
         }
@@ -123,6 +137,24 @@ public class Table {
         return c.row >= 0 && c.row < size && c.col >= 0 
                 && c.col < size && !isFieldMarked(c);
     }
+    
+    /**
+     * Makes a deep copy of itself.
+     * 
+     * @return A deep copy of itself
+     */
+    public Table deepCopy() {
+        Table result = new Table(this.size);
+        
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                Coordinate c = new Coordinate(row, col);
+                result.putMark(c, this.matrix[c.row][c.col]);
+            }
+        }
+        
+        return result;
+    }
 
     @Override
     public String toString() {
@@ -148,5 +180,4 @@ public class Table {
     public boolean isFieldVertical(Coordinate c) {
         return matrix[c.row][c.col] == 1;
     }
-
 }

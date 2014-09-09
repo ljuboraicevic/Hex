@@ -1,16 +1,143 @@
 package hex;
 
+import java.util.Random;
+
 /**
  *
  * @author Ljubo Raicevic <rljubo90@gmail.com>
  */
 public class PlayerMonteCarlo implements Player {
 
+    /**
+     * Determines how many times Monte Carlo simulation is run.
+     */
+    private final int repetitions;
+
+    /**
+     * Initializes a new PlayerMonteCarlo.
+     * 
+     * @param repetitions Monte Carlo simulation repetitions
+     */
+    public PlayerMonteCarlo(int repetitions) {
+        this.repetitions = repetitions;
+    }
+    
     @Override
     public Coordinate makeMove(Table t) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //make a deep copy of the table
+        Table tableCopy = t.deepCopy();
+        
+        //get coordinates of empty fields in the table
+        Coordinate[] emptyFields = t.getEmptyFields();
+        
+        int bestResult = -1;
+        Coordinate bestField  = null;
+        int noOfEmptyFields = t.noOfEmptyFields;
+        int movesPlayed = t.size * t.size - noOfEmptyFields;
+        byte player = t.whosOnTheMove();
+        
+        //for each of the empty fields in the table
+        for (int field = 0; field < emptyFields.length; field++) {
+        
+            int thisFieldWinSum = 0;
+            
+            //mark current "empty" field as this player's and then run the
+            //simulation on the rest of the empty fields
+            tableCopy.matrix[emptyFields[field].row][emptyFields[field].col] = player;
+            
+            //make repetitions
+            for (int repetition = 0; repetition < repetitions; repetition++) {
+                
+                //get random sequence
+                byte[] sequence = getRandomSequence(
+                        noOfEmptyFields, 
+                        player, 
+                        movesPlayed);
+                
+                //overlay the random sequence on top of the tableCopy
+                for (int iCount = 0; iCount < sequence.length; iCount++) {
+                    Coordinate c = emptyFields[iCount];
+                    if (iCount != field && !t.isFieldMarked(c)) {
+                        tableCopy.matrix[c.row][c.col] = sequence[iCount];
+                    }
+                }
+                
+                //check if this player won
+                if (didIWin(tableCopy, player)) {
+                    thisFieldWinSum++;
+                }
+            }
+        
+            //if this field is the best so far
+            if (thisFieldWinSum > bestResult) {
+                bestField = emptyFields[field];
+            }
+        }
+        
+        return bestField;
     }
 
+    /**
+     * Makes a random sequence of moves.
+     * 
+     * @param sequenceLength
+     * @param player
+     * @param movesPlayed
+     * @return 
+     */
+    private byte[] getRandomSequence(int sequenceLength, byte player, 
+            int movesPlayed) {
+        
+        byte[] result = new byte[sequenceLength];
+        int ones = getNumberOfFirstPlayersMoves(sequenceLength, player, movesPlayed);
+        
+        //fill in the ones and twos
+        for (int iCount = 0; iCount < sequenceLength; iCount++) {
+            result[iCount] = iCount < ones ? (byte) 1 : (byte) 2;
+        }
+
+        //shuflle the array
+        shuffleArray(result);
+        
+        return result;
+    }
+    
+    /**
+     * Shuffle the byte array
+     * 
+     * @param ar Array of bytes
+     */
+    static void shuffleArray(byte[] ar) {
+        Random random = new Random();
+        for (int i = ar.length - 1; i > 0; i--) {
+            int index = random.nextInt(i + 1);
+            byte a = ar[index];
+            ar[index] = ar[i];
+            ar[i] = a;
+        }
+    }
+    
+    /**
+     * Returns how many ones or first player's moves should be in the random
+     * sequence.
+     * 
+     * @param movesPlayed Moved played so far in the game
+     * @param player Which player is on the move
+     * @param sequenceLength Length of the random sequence
+     * @return Number of first players moves
+     */
+    private int getNumberOfFirstPlayersMoves(int movesPlayed, byte player, 
+            int sequenceLength) {
+        
+        int result = Math.round(sequenceLength / 2);
+        if (movesPlayed % 2 == 0 && player == 0) { 
+            result -= 1; 
+        } else if (movesPlayed % 2 == 1 && player == 1) {
+            result += 1;
+        }
+        
+        return result;
+    }
     
     /**
      * Checks if player won game. Checks from top to bottom in each row if there is vertical player
