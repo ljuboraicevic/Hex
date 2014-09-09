@@ -112,6 +112,17 @@ public class Table {
     public boolean isFieldMarked(Coordinate c) {
         return matrix[c.row][c.col] != 0;
     }
+    
+    /**
+     * Checks if the move is legal.
+     * 
+     * @param c Coordinates of the field played
+     * @return true if move is legal, false otherwise
+     */
+    public boolean isMoveLegal(Coordinate c) {
+        return c.row >= 0 && c.row < size && c.col >= 0 
+                && c.col < size && !isFieldMarked(c);
+    }
 
     @Override
     public String toString() {
