@@ -21,10 +21,19 @@ public class PlayerHuman implements Player{
     public Coordinate makeMove(Table t) {
         Scanner scan = new Scanner(System.in);
         System.out.println(t);
-        System.out.print("Row: ");
-        int row = scan.nextInt();
-        System.out.print("Col: ");
-        int col = scan.nextInt();
-        return new Coordinate(--row, --col);
+        Coordinate move = null;
+        boolean legal = false;
+        
+        while (!legal) {
+            System.out.print("Row: ");
+            int row = scan.nextInt();
+            System.out.print("Col: ");
+            int col = scan.nextInt();
+            move = new Coordinate(--row, --col);
+            legal = t.isMoveLegal(move);
+            if (!legal) { System.out.println("Illegal move!"); }
+        }
+        
+        return move;
     }
 }

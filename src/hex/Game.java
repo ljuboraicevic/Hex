@@ -74,12 +74,6 @@ public class Game {
             //players take turns based on number of moves played so far
             Coordinate move = players[movesPlayed % 2].makeMove(table);
 
-            //repeat if move is illegal
-            while (!isLegalMove(move)) {
-                System.out.println("Illegal move! Try again:");
-                move = players[movesPlayed % 2].makeMove(table);
-            }
-
             //players[0]'s mark is 1 and player[1]'s mark is 2
             table.putMark(move, (byte) (movesPlayed % 2 + 1));
 
@@ -143,19 +137,14 @@ public class Game {
     private int getIndexOfAddedNodeInUF(Coordinate c) {
         int player = movesPlayed % 2;
 
-        //added node for the up side
-        if (c.row == 0 && player == 0) {
-            return ufSize - 4;
-        } //added node for the down side
-        else if (c.row == table.size - 1 && player == 0) {
-            return ufSize - 3;
-        } //added node for the left side
-        else if (c.col == 0 && player == 1) {
-            return ufSize - 2;
-        } //added node for the right side
-        else if (c.col == table.size - 1 && player == 1) {
-            return ufSize - 1;
-        }
+       //added node for the up side
+        if      (c.row == 0              && player == 0) { return ufSize - 4; }
+        //added node for the down side
+        else if (c.row == table.size - 1 && player == 0) { return ufSize - 3; }
+        //added node for the left side
+        else if (c.col == 0              && player == 1) { return ufSize - 2; }
+        //added node for the right side
+        else if (c.col == table.size - 1 && player == 1) { return ufSize - 1; }
 
         return 0;
     }
@@ -171,12 +160,12 @@ public class Game {
 
         //list of all possible neighbors, even the illegal ones
         Coordinate[] neighbors = new Coordinate[6];
-        neighbors[0] = new Coordinate(c.row - 1, c.col);
+        neighbors[0] = new Coordinate(c.row - 1, c.col    );
         neighbors[1] = new Coordinate(c.row - 1, c.col + 1);
-        neighbors[2] = new Coordinate(c.row, c.col - 1);
-        neighbors[3] = new Coordinate(c.row, c.col + 1);
+        neighbors[2] = new Coordinate(c.row,     c.col - 1);
+        neighbors[3] = new Coordinate(c.row,     c.col + 1);
         neighbors[4] = new Coordinate(c.row + 1, c.col - 1);
-        neighbors[5] = new Coordinate(c.row + 1, c.col);
+        neighbors[5] = new Coordinate(c.row + 1, c.col    );
 
         //remove illegal neighbors & neighbors of different color (very racist)
         int nullCount = 0;
@@ -204,13 +193,5 @@ public class Game {
         }
 
         return result;
-    }
-
-    private boolean isLegalMove(Coordinate c) {
-        if (c.row < 0 || c.row >= table.size || c.col < 0 || c.col >= table.size
-                || table.isFieldMarked(c)) {
-            return false;
-        }
-        return true;
     }
 }
