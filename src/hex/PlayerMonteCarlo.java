@@ -43,13 +43,13 @@ public class PlayerMonteCarlo implements Player {
             
             //mark current "empty" field as this player's and then run the
             //simulation on the rest of the empty fields
-            tableCopy.matrix[emptyFields[field].row][emptyFields[field].col] = player;
+            tableCopy.matrix[emptyFields[field].row][emptyFields[field].col] = (byte) (player + 1);
             
             //make repetitions
             for (int repetition = 0; repetition < repetitions; repetition++) {
                 
                 //get random sequence
-                byte[] sequence = getRandomSequence(movesPlayed, t.size);
+                byte[] sequence = getRandomSequence(movesPlayed, t.size * t.size);
                 
                 //overlay the random sequence on top of the tableCopy
                 for (int iCount = 0; iCount < sequence.length; iCount++) {
@@ -67,6 +67,7 @@ public class PlayerMonteCarlo implements Player {
         
             //if this field is the best so far
             if (thisFieldWinSum > bestResult) {
+                bestResult = thisFieldWinSum;
                 bestField = emptyFields[field];
             }
         }

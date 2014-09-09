@@ -12,7 +12,7 @@ public class Hex {
     public static void main(String[] args) {
         Table table = new Table(5);
         Player first = new PlayerHuman();
-        Player second = new PlayerHuman();
+        Player second = new PlayerMonteCarlo(1000);
         
         Game g = new Game(table, first, second);
         g.play();
