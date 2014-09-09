@@ -49,10 +49,7 @@ public class PlayerMonteCarlo implements Player {
             for (int repetition = 0; repetition < repetitions; repetition++) {
                 
                 //get random sequence
-                byte[] sequence = getRandomSequence(
-                        noOfEmptyFields, 
-                        player, 
-                        movesPlayed);
+                byte[] sequence = getRandomSequence(movesPlayed, t.size);
                 
                 //overlay the random sequence on top of the tableCopy
                 for (int iCount = 0; iCount < sequence.length; iCount++) {
@@ -80,25 +77,51 @@ public class PlayerMonteCarlo implements Player {
     /**
      * Makes a random sequence of moves.
      * 
-     * @param sequenceLength
-     * @param player
      * @param movesPlayed
+     * @param tableSize
      * @return 
      */
-    private byte[] getRandomSequence(int sequenceLength, byte player, 
-            int movesPlayed) {
-        
-        byte[] result = new byte[sequenceLength];
-        int ones = getNumberOfFirstPlayersMoves(sequenceLength, player, movesPlayed);
+    private byte[] getRandomSequence(int movesPlayed, int tableSize) {
+        byte[] result = getSequence(movesPlayed, tableSize);
+        shuffleArray(result);
+        return result;
+    }
+
+    /**
+     * Makes a non-random sequence of moves.
+     * 
+     * @param movesPlayed
+     * @param tableSize
+     * @return 
+     */
+    private byte[] getSequence(int movesPlayed, int tableSize) {
+        byte[] result = new byte[tableSize - movesPlayed - 1];
+        int ones = getNumberOfFirstPlayersMoves(movesPlayed, tableSize);
         
         //fill in the ones and twos
-        for (int iCount = 0; iCount < sequenceLength; iCount++) {
+        for (int iCount = 0; iCount < result.length; iCount++) {
             result[iCount] = iCount < ones ? (byte) 1 : (byte) 2;
         }
-
-        //shuflle the array
-        shuffleArray(result);
         
+        return result;
+    }
+    
+    /**
+     * Returns how many ones or first player's moves should be in the random
+     * sequence.
+     * 
+     * @param movesPlayed Moved played so far in the game
+     * @param tableSize Size of the table
+     * @return Number of first players moves
+     */
+    private int getNumberOfFirstPlayersMoves(int movesPlayed, int tableSize) {
+        int length = tableSize - movesPlayed - 1;
+        int result = (int) Math.floor(length / 2);
+        
+        if (movesPlayed % 2 == 1) {
+            if (length % 2 == 1) { result += 1; }
+        }
+       
         return result;
     }
     
@@ -115,28 +138,6 @@ public class PlayerMonteCarlo implements Player {
             ar[index] = ar[i];
             ar[i] = a;
         }
-    }
-    
-    /**
-     * Returns how many ones or first player's moves should be in the random
-     * sequence.
-     * 
-     * @param movesPlayed Moved played so far in the game
-     * @param player Which player is on the move
-     * @param sequenceLength Length of the random sequence
-     * @return Number of first players moves
-     */
-    private int getNumberOfFirstPlayersMoves(int movesPlayed, byte player, 
-            int sequenceLength) {
-        
-        int result = Math.round(sequenceLength / 2);
-        if (movesPlayed % 2 == 0 && player == 0) { 
-            result -= 1; 
-        } else if (movesPlayed % 2 == 1 && player == 1) {
-            result += 1;
-        }
-        
-        return result;
     }
     
     /**
