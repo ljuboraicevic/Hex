@@ -1,5 +1,7 @@
 package hex;
 
+import java.util.LinkedList;
+
 /**
  * The <tt>Game</tt> class represents a single game of Hex.
  *
@@ -21,7 +23,11 @@ public class Game {
      * How many moves have been played so far in the game.
      */
     private int movesPlayed;
-
+    
+    /**
+     * Array of moves played. Used in statistic.
+     */
+    private LinkedList<Table> moves;
     /**
      * Union-find data structure that helps determine who (if anyone) won. Last
      * four entries represent added fields: ufSize - 4 & ufSize - 3 => player 1
@@ -45,6 +51,7 @@ public class Game {
         this.table = t;
         this.ufSize = t.size * t.size + 4;
         this.unionFind = new UF(ufSize);
+        this.moves = new LinkedList<>();
     }
 
     /**
@@ -77,6 +84,9 @@ public class Game {
             //players[0]'s mark is 1 and player[1]'s mark is 2
             table.putMark(move, (byte) (movesPlayed % 2 + 1));
 
+            //add table to moves
+            moves.add(table.deepCopy());
+            
             //connect the field to its neighbors of the same color
             Coordinate[] sameColorNeighbors = findFieldsNeighborsOfSameColor(move);
 
@@ -193,5 +203,9 @@ public class Game {
         }
 
         return result;
+    }
+    
+    public LinkedList<Table> getAllMoves(){
+        return this.moves;
     }
 }
