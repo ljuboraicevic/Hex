@@ -32,7 +32,7 @@ public class PlayerMonteCarloTest {
     @Test
     public void testDidIWin() {
         try {
-            PlayerMonteCarlo pmc = new PlayerMonteCarlo(0);
+            PlayerMonteCarlo pmc = new PlayerMonteCarlo(0,1);
             Class[] cArg = new Class[2];
             cArg[0] = Table.class;
             cArg[1] = byte.class;
@@ -71,7 +71,7 @@ public class PlayerMonteCarloTest {
                     Integer.TYPE, Integer.TYPE);
             method.setAccessible(true);
             
-            PlayerMonteCarlo pmc = new PlayerMonteCarlo(0);
+            PlayerMonteCarlo pmc = new PlayerMonteCarlo(0,1);
             //int movesPlayed, int tableSize
             
             int res1 = (int) method.invoke(pmc, 1, 25);
@@ -117,7 +117,7 @@ public class PlayerMonteCarloTest {
             method.setAccessible(true);
             //int movesPlayed, int tableSize
             
-            PlayerMonteCarlo pmc = new PlayerMonteCarlo(0);
+            PlayerMonteCarlo pmc = new PlayerMonteCarlo(0,1);
             
             byte[] res1 = (byte[])method.invoke(pmc, 0, 9);
             byte[] res2 = (byte[])method.invoke(pmc, 1, 16);

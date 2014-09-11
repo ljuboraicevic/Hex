@@ -16,8 +16,8 @@ public class Hex {
         int i = 0;
         while (i++ < 10) {
             Table table = new Table(11);
-            Player first = new PlayerMonteCarlo(1000);
-            Player second = new PlayerMonteCarlo(1000);
+            Player first = new PlayerMonteCarlo(10000, 6);
+            Player second = new PlayerMonteCarlo(1000, 6);
 
             Game g = new Game(table, first, second);
             g.play();

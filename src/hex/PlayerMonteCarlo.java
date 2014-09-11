@@ -1,6 +1,8 @@
 package hex;
 
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -12,69 +14,94 @@ public class PlayerMonteCarlo implements Player {
      * Determines how many times Monte Carlo simulation is run.
      */
     private final int repetitions;
+    
+    /**
+     * How many threads should be used when doing the simulation.
+     */
+    private final int threads;
 
     /**
      * Initializes a new PlayerMonteCarlo.
      * 
      * @param repetitions Monte Carlo simulation repetitions
+     * @param threads How many threads to use during the simulation
      */
-    public PlayerMonteCarlo(int repetitions) {
+    public PlayerMonteCarlo(int repetitions, int threads) {
         this.repetitions = repetitions;
+        this.threads = threads;
     }
     
     @Override
     public Coordinate makeMove(Table t) {
-        //make a deep copy of the table
-        Table tableCopy = t.deepCopy();
+        //make a deep copy of the table for each thread
+        Table[] tableCopies = new Table[threads];
+        for (int iCount = 0; iCount < threads; iCount++) {
+            tableCopies[iCount] = t.deepCopy();
+        }
         
         //get coordinates of empty fields in the table
         Coordinate[] emptyFields = t.getEmptyFields();
         
-        int bestResult = -1;
-        Coordinate bestField  = null;
         int noOfEmptyFields = t.noOfEmptyFields;
         int movesPlayed = t.size * t.size - noOfEmptyFields;
         byte player = t.whosOnTheMove();
         
-        //for each of the empty fields in the table
-        for (int field = 0; field < emptyFields.length; field++) {
+        //create simulation threads
+        MonteCarloSimulation[] simArray = new MonteCarloSimulation[threads];
+        int fields = t.noOfEmptyFields / threads;
+        int iCount;
+        for (iCount = 0; iCount < threads - 1; iCount++) {
+            simArray[iCount] = new MonteCarloSimulation(
+                    tableCopies[iCount], 
+                    t,
+                    emptyFields, 
+                    iCount * fields, 
+                    (iCount + 1) * fields - 1, 
+                    repetitions, 
+                    movesPlayed, 
+                    player);
+        }
         
-            int thisFieldWinSum = 0;
-            
-            //mark current "empty" field as this player's and then run the
-            //simulation on the rest of the empty fields
-            tableCopy.matrix[emptyFields[field].row][emptyFields[field].col] = (byte) (player + 1);
-            
-            //make repetitions
-            for (int repetition = 0; repetition < repetitions; repetition++) {
-                
-                //get random sequence
-                byte[] sequence = getRandomSequence(movesPlayed, t.size * t.size);
-                
-                //overlay the random sequence on top of the tableCopy
-                for (int iCount = 0; iCount < sequence.length; iCount++) {
-                    Coordinate c = emptyFields[iCount];
-                    if (iCount != field && !t.isFieldMarked(c)) {
-                        tableCopy.matrix[c.row][c.col] = sequence[iCount];
-                    }
-                }
-                
-                //check if this player won
-                if (didIWin(tableCopy, player)) {
-                    thisFieldWinSum++;
-                }
+        //last simulation
+        simArray[threads - 1] = new MonteCarloSimulation(
+                tableCopies[threads - 1], 
+                t,
+                emptyFields, 
+                iCount * fields, 
+                noOfEmptyFields - 1, 
+                repetitions, 
+                movesPlayed, 
+                player);
+        
+        //start all threads
+        for (MonteCarloSimulation mcs : simArray) {
+            mcs.start();
+        }
+        
+        //join, so that everything bellow has to wait until they're done
+        for (MonteCarloSimulation mcs : simArray) {
+            try {
+                mcs.join();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(PlayerMonteCarlo.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
         
-            //if this field is the best so far
-            if (thisFieldWinSum > bestResult) {
-                bestResult = thisFieldWinSum;
-                bestField = emptyFields[field];
+        Coordinate bestField = null;
+        int bestResult = -1;
+        
+        //go through each of the threads' best results and choose the best one
+        for (iCount = 0; iCount < threads; iCount++) {
+            int currentBest = simArray[iCount].getBestResult();
+            if (currentBest > bestResult) {
+                bestResult = currentBest;
+                bestField = simArray[iCount].getBestField();
             }
         }
         
         return bestField;
     }
-
+    
     /**
      * Makes a random sequence of moves.
      * 
@@ -82,7 +109,7 @@ public class PlayerMonteCarlo implements Player {
      * @param tableSize
      * @return 
      */
-    private byte[] getRandomSequence(int movesPlayed, int tableSize) {
+    public static byte[] getRandomSequence(int movesPlayed, int tableSize) {
         byte[] result = getSequence(movesPlayed, tableSize);
         shuffleArray(result);
         return result;
@@ -95,7 +122,7 @@ public class PlayerMonteCarlo implements Player {
      * @param tableSize
      * @return 
      */
-    private byte[] getSequence(int movesPlayed, int tableSize) {
+    private static byte[] getSequence(int movesPlayed, int tableSize) {
         byte[] result = new byte[tableSize - movesPlayed - 1];
         int ones = getNumberOfFirstPlayersMoves(movesPlayed, tableSize);
         
@@ -115,7 +142,7 @@ public class PlayerMonteCarlo implements Player {
      * @param tableSize Size of the table
      * @return Number of first players moves
      */
-    private int getNumberOfFirstPlayersMoves(int movesPlayed, int tableSize) {
+    private static int getNumberOfFirstPlayersMoves(int movesPlayed, int tableSize) {
         int length = tableSize - movesPlayed - 1;
         int result = (int) Math.floor(length / 2);
         
@@ -150,7 +177,7 @@ public class PlayerMonteCarlo implements Player {
      * @param player == 0 => vertical player's move, player == 1 => horizontal player's move
      * @return 
      */
-    private boolean didIWin(Table t, byte player) {
+    public static boolean didIWin(Table t, byte player) {
         //booleans that indicate that on [i] position in currentRow there is active vertical field
         //field that's marked by player0
         boolean[] activeVerticalFieldsInRow = new boolean[t.size];
@@ -181,7 +208,7 @@ public class PlayerMonteCarlo implements Player {
      * @param activeFields
      * @return 
      */
-    private boolean anyVerticalPlayerOnPotentialFieldInRow(Table t, int row, boolean[] activeFields) {
+    private static boolean anyVerticalPlayerOnPotentialFieldInRow(Table t, int row, boolean[] activeFields) {
         for (int i = 0; i < t.size; i++) {
             if (activeFields[i] && t.isFieldVertical(new Coordinate(row, i))) {
                 return true;
@@ -204,7 +231,7 @@ public class PlayerMonteCarlo implements Player {
      * @param previousRowActiveFields
      * @return 
      */
-    private boolean[] getPotentialsInRow(Table t, int row, boolean[] previousRowActiveFields) {
+    private static boolean[] getPotentialsInRow(Table t, int row, boolean[] previousRowActiveFields) {
         boolean potentials[] = new boolean[t.size];
         for (int i = 0; i < t.size - 1; i++) {
             potentials[i] = t.isFieldVertical(new Coordinate(row, i)) && (previousRowActiveFields[i] || previousRowActiveFields[i + 1]);
@@ -222,7 +249,7 @@ public class PlayerMonteCarlo implements Player {
      * @param currentRow
      * @param activeVerticalFieldsInRow 
      */
-    private void checkForMissedActiveFields(Table t, int currentRow, boolean[] activeVerticalFieldsInRow) {
+    private static void checkForMissedActiveFields(Table t, int currentRow, boolean[] activeVerticalFieldsInRow) {
         for (int i = 1; i < t.size; i++) {
             if (!activeVerticalFieldsInRow[i] && t.isFieldVertical(new Coordinate(currentRow, i))) {
                 activeVerticalFieldsInRow[i] = activeVerticalFieldsInRow[i - 1];
