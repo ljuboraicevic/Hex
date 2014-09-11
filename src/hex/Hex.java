@@ -1,5 +1,6 @@
 package hex;
 
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,10 +15,11 @@ public class Hex {
      */
     public static void main(String[] args) {
         int i = 0;
-        while (i++ < 10) {
+        while (i++ < 5) {
             Table table = new Table(11);
-            Player first = new PlayerMonteCarlo(10000, 6);
-            Player second = new PlayerMonteCarlo(1000, 6);
+            Player first = new PlayerMonteCarlo(1000, 6);
+            //Player second = new PlayerMonteCarlo(1000, 6);
+            Player second = new PlayerNeuralNetwork(new File("1.nnet"));
 
             Game g = new Game(table, first, second);
             g.play();

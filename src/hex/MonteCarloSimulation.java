@@ -9,15 +9,56 @@ package hex;
  */
 public class MonteCarloSimulation extends Thread{
 
+    /**
+     * Table that will be used for simulation.
+     */
     private final Table t;
+    
+    /**
+     * The original table from the game.
+     */
     private final Table originalTable;
+    
+    /**
+     * List of empty fields on the table.
+     */
     private final Coordinate[] emptyFields;
+    
+    /**
+     * This simulation should only take some empty fields into account. Variable
+     * from represents the start of range of empty fields that this simulation
+     * will work with.
+     */
     private final int from;
+    
+    /**
+     * End of range of empty fields that this simulation will work with.
+     */
     private final int to;
+    
+    /**
+     * Number of repetitions of the simulation.
+     */
     private final int repetitions;
+    
+    /**
+     * Used to store the best result.
+     */
     private Integer bestResult;
+    
+    /**
+     * Used to store the field that produced the best result.
+     */
     private Coordinate bestField;
+    
+    /**
+     * How many moves have been played so far.
+     */
     private final int movesPlayed;
+    
+    /**
+     * Who is the player, number 1 or 2.
+     */
     private final byte player;
 
     /**
@@ -95,10 +136,20 @@ public class MonteCarloSimulation extends Thread{
         }
     }
     
+    /**
+     * Get the best field that this simulation came up with.
+     * 
+     * @return Best field
+     */
     public Coordinate getBestField() {
         return bestField;
     }
     
+    /**
+     * Get the best result.
+     * 
+     * @return Best result
+     */
     public int getBestResult() {
         return bestResult;
     }
