@@ -1,7 +1,5 @@
 package hex;
 
-import java.util.LinkedList;
-
 /**
  * The <tt>Game</tt> class represents a single game of Hex.
  *
@@ -12,29 +10,25 @@ public class Game {
     /**
      * Table on which the game is played.
      */
-    private final Table table;
+    protected final Table table;
 
     /**
      * Array of players.
      */
-    private final Player[] players;
+    protected final Player[] players;
 
     /**
      * How many moves have been played so far in the game.
      */
-    private int movesPlayed;
+    protected int movesPlayed;
     
-    /**
-     * Array of moves played. Used in statistic.
-     */
-    private LinkedList<Table> moves;
     /**
      * Union-find data structure that helps determine who (if anyone) won. Last
      * four entries represent added fields: ufSize - 4 & ufSize - 3 => player 1
      * ufSize - 2 & ufSize - 1 => player 2
      */
-    private final UF unionFind;
-    private final int ufSize;
+    protected final UF unionFind;
+    protected final int ufSize;
 
     /**
      * Initializes a new game.
@@ -51,7 +45,6 @@ public class Game {
         this.table = t;
         this.ufSize = t.size * t.size + 4;
         this.unionFind = new UF(ufSize);
-        this.moves = new LinkedList<>();
     }
 
     /**
@@ -84,8 +77,13 @@ public class Game {
             //players[0]'s mark is 1 and player[1]'s mark is 2
             table.putMark(move, (byte) (movesPlayed % 2 + 1));
 
-            //add table to moves
-            moves.add(table.deepCopy());
+//            //if this game is being recorded
+//            if (recordGame) {
+//                //add table to moves
+//                moves.add(table.deepCopy());
+//                //add probabilities
+//                probabilities.add(move.getProbability());
+//            }
             
             //connect the field to its neighbors of the same color
             Coordinate[] sameColorNeighbors = findFieldsNeighborsOfSameColor(move);
@@ -114,7 +112,7 @@ public class Game {
      * @param c Coordinates of the field
      * @return true if field is on the edge, false otherwise
      */
-    private boolean isFieldOnPlayersEdge(Coordinate c) {
+    protected boolean isFieldOnPlayersEdge(Coordinate c) {
         int size = table.size - 1;
         int player = movesPlayed % 2;
 
@@ -133,7 +131,7 @@ public class Game {
      * @param c Coordinates of the field
      * @return Index of the field in the union find
      */
-    private int getFieldIndex(Coordinate c) {
+    protected int getFieldIndex(Coordinate c) {
         return c.row * table.size + c.col;
     }
 
@@ -144,7 +142,7 @@ public class Game {
      * be found
      * @return Index of the added edge in union find
      */
-    private int getIndexOfAddedNodeInUF(Coordinate c) {
+    protected int getIndexOfAddedNodeInUF(Coordinate c) {
         int player = movesPlayed % 2;
 
        //added node for the up side
@@ -165,7 +163,7 @@ public class Game {
      * @param c Coordinates of the field
      * @return Array of coordinates of the neighbors of the field
      */
-    private Coordinate[] findFieldsNeighborsOfSameColor(Coordinate c) {
+    protected Coordinate[] findFieldsNeighborsOfSameColor(Coordinate c) {
         byte color = table.matrix[c.row][c.col];
 
         //list of all possible neighbors, even the illegal ones
@@ -203,9 +201,5 @@ public class Game {
         }
 
         return result;
-    }
-    
-    public LinkedList<Table> getAllMoves(){
-        return this.moves;
     }
 }

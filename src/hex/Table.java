@@ -155,6 +155,23 @@ public class Table {
         return result;
     }
 
+    public String toSingleRowString(boolean reverse) {
+        StringBuilder sb = new StringBuilder();
+        
+        for (byte[] row : matrix) {
+            for (byte field : row) {
+                //sb.append(reverse ? (1 + Math.abs(field - 2)) : field);
+                if (field > 0 && reverse) {
+                    sb.append(1 + Math.abs(field - 2));
+                } else {
+                    sb.append(field);
+                }
+            }
+        }
+        
+        return sb.toString();
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

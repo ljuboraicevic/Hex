@@ -33,6 +33,10 @@ public class PlayerMonteCarlo implements Player {
     
     @Override
     public Coordinate makeMove(Table t) {
+        return makeMoveWithProbability(t).getCoordinates();
+    }
+    
+    public MCSimulationMove makeMoveWithProbability(Table t) {
         //make a deep copy of the table for each thread
         Table[] tableCopies = new Table[threads];
         for (int iCount = 0; iCount < threads; iCount++) {
@@ -99,7 +103,7 @@ public class PlayerMonteCarlo implements Player {
             }
         }
         
-        return bestField;
+        return new MCSimulationMove(bestField, (double)bestResult);
     }
     
     /**
