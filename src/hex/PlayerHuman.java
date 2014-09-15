@@ -14,13 +14,13 @@ public class PlayerHuman implements Player{
      * Asks player to input the coordinates of her move and returns that as her
      * move.
      * 
-     * @param t Hex table
+     * @param b Hex board
      * @return Coordinates of the player's move
      */
     @Override
-    public Coordinate makeMove(Table t) {
+    public Coordinate makeMove(Board b) {
         Scanner scan = new Scanner(System.in);
-        System.out.println(t);
+        System.out.println(b);
         Coordinate move = null;
         boolean legal = false;
         
@@ -30,7 +30,7 @@ public class PlayerHuman implements Player{
             System.out.print("Col: ");
             int col = scan.nextInt();
             move = new Coordinate(--row, --col);
-            legal = t.isMoveLegal(move);
+            legal = b.isMoveLegal(move);
             if (!legal) { System.out.println("Illegal move!"); }
         }
         

@@ -21,16 +21,16 @@ public class GameRecordedMonteCarlo extends Game {
     /**
      * Array of moves played. Used in statistic.
      */
-    protected LinkedList<Table> moves;
+    protected LinkedList<Board> moves;
     protected LinkedList<Double> probabilities;
     
     public GameRecordedMonteCarlo(
-            Table t, 
+            Board b, 
             PlayerMonteCarlo first, 
             PlayerMonteCarlo second,
             int repetitions) {
         
-        super(t, first, second);
+        super(b, first, second);
         this.players = new PlayerMonteCarlo[2];
         this.players[0] = first;
         this.players[1] = second;
@@ -46,13 +46,13 @@ public class GameRecordedMonteCarlo extends Game {
         //while game isn't over
         while (winningPlayer == 0) {
             //players take turns based on number of moves played so far
-            MCSimulationMove move = players[movesPlayed % 2].makeMoveWithProbability(table);
+            MCSimulationMove move = players[movesPlayed % 2].makeMoveWithProbability(board);
 
             //players[0]'s mark is 1 and player[1]'s mark is 2
-            table.putMark(move.getCoordinates(), (byte) (movesPlayed % 2 + 1));
+            board.putMark(move.getCoordinates(), (byte) (movesPlayed % 2 + 1));
 
-            //add table to moves
-            moves.add(table.deepCopy());
+            //add board to moves
+            moves.add(board.deepCopy());
             //add probabilities
             probabilities.add(move.getProbability());
             
@@ -76,11 +76,11 @@ public class GameRecordedMonteCarlo extends Game {
             winningPlayer = whoWon();
         }
         
-        System.out.println(table);
+        System.out.println(board);
         System.out.println("Player " + winningPlayer + " wins!");
     }
     
-    public LinkedList<Table> getAllMoves(){
+    public LinkedList<Board> getAllMoves(){
         return this.moves;
     }
     
@@ -92,9 +92,8 @@ public class GameRecordedMonteCarlo extends Game {
         StringBuilder sb = new StringBuilder();
         
         for (int moveCount = 0; moveCount < this.moves.size(); moveCount++) {
-            Table move = this.moves.get(moveCount);
+            Board move = this.moves.get(moveCount);
             sb.append(move.toSingleRowString(moveCount % 2 != 0));
-            sb.append(' ');
             //get the relative number of wins (# of wins divided by repetitions)
             double prob = this.probabilities.get(moveCount) / repetitions;
             sb.append(prob);

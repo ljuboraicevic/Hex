@@ -1,6 +1,5 @@
 package hex;
 
-import java.io.File;
 import org.neuroph.core.NeuralNetwork;
 
 /**
@@ -19,36 +18,36 @@ public class PlayerNeuralNetwork implements Player{
      * 
      * @param f Neural network file
      */
-    public PlayerNeuralNetwork(File f) {
-        nn = NeuralNetwork.createFromFile(f);
+    public PlayerNeuralNetwork(String f) {
+        nn = NeuralNetwork.load(f);
     }
     
     @Override
-    public Coordinate makeMove(Table t) {
-        //make a deep copy of the table
-        Table tableCopy = t.deepCopy();
+    public Coordinate makeMove(Board b) {
+        //make a deep copy of the board
+        Board boardCopy = b.deepCopy();
         
-        //get coordinates of empty fields in the table
-        Coordinate[] emptyFields = t.getEmptyFields();
+        //get coordinates of empty fields in the board
+        Coordinate[] emptyFields = b.getEmptyFields();
 
         double bestResult = -1;
         Coordinate bestField  = null;
-        int noOfEmptyFields = t.noOfEmptyFields;
-        byte player = t.whosOnTheMove();
+        int noOfEmptyFields = b.noOfEmptyFields;
+        byte player = b.whosOnTheMove();
         
         //for each of the empty fields
         for (int field = 0; field < noOfEmptyFields; field++) {
             //set previously checked field to zero
             if (field > 0) { 
                 Coordinate prev = emptyFields[field - 1];
-                tableCopy.matrix[prev.row][prev.col] = (byte)0; 
+                boardCopy.matrix[prev.row][prev.col] = (byte)0; 
             }
             
             //put mark on the field
-            tableCopy.putMark(emptyFields[field], (byte)(player + 1));
+            boardCopy.putMark(emptyFields[field], (byte)(player + 1));
             
-            //ask the neural network if it likes the table
-            double[] input = transformTableToNNInput(tableCopy, player);
+            //ask the neural network if it likes the board
+            double[] input = transformBoardToNNInput(boardCopy, player);
             nn.setInput(input);
             nn.calculate();
             double[] result = nn.getOutput();
@@ -64,20 +63,20 @@ public class PlayerNeuralNetwork implements Player{
     }
     
     /**
-     * Transforms the table to neural network input.
+     * Transforms the board to neural network input.
      * 
-     * @param t Table
+     * @param b Board
      * @param player Which player is neural network, one or two
      * @return Neural network input
      */
-    private static double[] transformTableToNNInput(Table t, byte player) {
-        double[] result = new double[t.size * t.size];
+    private static double[] transformBoardToNNInput(Board b, byte player) {
+        double[] result = new double[b.size * b.size];
         
         //copy matrix to result and apply transformations
-        for (int row = 0; row < t.size; row++) {
-            for (int col = 0; col < t.size; col++) {
-                result[row * t.size + col] = 
-                        (double)(t.matrix[row][col] + f(player, t.matrix[row][col])) * 10.0;
+        for (int row = 0; row < b.size; row++) {
+            for (int col = 0; col < b.size; col++) {
+                result[row * b.size + col] = 
+                        (double)(b.matrix[row][col] + f(player, b.matrix[row][col]));
             }
         }        
         

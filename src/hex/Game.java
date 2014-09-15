@@ -8,9 +8,9 @@ package hex;
 public class Game {
 
     /**
-     * Table on which the game is played.
+     * Board on which the game is played.
      */
-    protected final Table table;
+    protected final Board board;
 
     /**
      * Array of players.
@@ -33,17 +33,17 @@ public class Game {
     /**
      * Initializes a new game.
      *
-     * @param t Table to be played on
+     * @param b Board to be played on
      * @param first First player (vertical)
      * @param second Second player (horizontal)
      */
-    public Game(Table t, Player first, Player second) {
+    public Game(Board b, Player first, Player second) {
         this.movesPlayed = 0;
         this.players = new Player[2];
         this.players[0] = first;
         this.players[1] = second;
-        this.table = t;
-        this.ufSize = t.size * t.size + 4;
+        this.board = b;
+        this.ufSize = b.size * b.size + 4;
         this.unionFind = new UF(ufSize);
     }
 
@@ -72,18 +72,10 @@ public class Game {
         //while game isn't over
         while (winningPlayer == 0) {
             //players take turns based on number of moves played so far
-            Coordinate move = players[movesPlayed % 2].makeMove(table);
+            Coordinate move = players[movesPlayed % 2].makeMove(board);
 
             //players[0]'s mark is 1 and player[1]'s mark is 2
-            table.putMark(move, (byte) (movesPlayed % 2 + 1));
-
-//            //if this game is being recorded
-//            if (recordGame) {
-//                //add table to moves
-//                moves.add(table.deepCopy());
-//                //add probabilities
-//                probabilities.add(move.getProbability());
-//            }
+            board.putMark(move, (byte) (movesPlayed % 2 + 1));
             
             //connect the field to its neighbors of the same color
             Coordinate[] sameColorNeighbors = findFieldsNeighborsOfSameColor(move);
@@ -102,18 +94,18 @@ public class Game {
             winningPlayer = whoWon();
         }
 
-        System.out.println(table);
+        System.out.println(board);
         System.out.println("Player " + winningPlayer + " wins!");
     }
 
     /**
-     * Checks if the field is on one of the edges of the table.
+     * Checks if the field is on one of the edges of the board.
      *
      * @param c Coordinates of the field
      * @return true if field is on the edge, false otherwise
      */
     protected boolean isFieldOnPlayersEdge(Coordinate c) {
-        int size = table.size - 1;
+        int size = board.size - 1;
         int player = movesPlayed % 2;
 
         //for the first player check vertical edges
@@ -132,7 +124,7 @@ public class Game {
      * @return Index of the field in the union find
      */
     protected int getFieldIndex(Coordinate c) {
-        return c.row * table.size + c.col;
+        return c.row * board.size + c.col;
     }
 
     /**
@@ -148,11 +140,11 @@ public class Game {
        //added node for the up side
         if      (c.row == 0              && player == 0) { return ufSize - 4; }
         //added node for the down side
-        else if (c.row == table.size - 1 && player == 0) { return ufSize - 3; }
+        else if (c.row == board.size - 1 && player == 0) { return ufSize - 3; }
         //added node for the left side
         else if (c.col == 0              && player == 1) { return ufSize - 2; }
         //added node for the right side
-        else if (c.col == table.size - 1 && player == 1) { return ufSize - 1; }
+        else if (c.col == board.size - 1 && player == 1) { return ufSize - 1; }
 
         return 0;
     }
@@ -164,7 +156,7 @@ public class Game {
      * @return Array of coordinates of the neighbors of the field
      */
     protected Coordinate[] findFieldsNeighborsOfSameColor(Coordinate c) {
-        byte color = table.matrix[c.row][c.col];
+        byte color = board.matrix[c.row][c.col];
 
         //list of all possible neighbors, even the illegal ones
         Coordinate[] neighbors = new Coordinate[6];
@@ -179,9 +171,9 @@ public class Game {
         int nullCount = 0;
         for (int iCount = 0; iCount < 6; iCount++) {
             Coordinate n = neighbors[iCount];
-            if (n.row < 0 || n.row >= table.size
-                    || n.col < 0 || n.col >= table.size
-                    || table.matrix[n.row][n.col] != color) {
+            if (n.row < 0 || n.row >= board.size
+                    || n.col < 0 || n.col >= board.size
+                    || board.matrix[n.row][n.col] != color) {
                 neighbors[iCount] = null;
                 nullCount++;
             }

@@ -34,7 +34,7 @@ public class PlayerMonteCarloTest {
         try {
             PlayerMonteCarlo pmc = new PlayerMonteCarlo(0,1);
             Class[] cArg = new Class[2];
-            cArg[0] = Table.class;
+            cArg[0] = Board.class;
             cArg[1] = byte.class;
             boolean[] solutions = {true, false, true, true, true, true, true, false, false};
             Method method = PlayerMonteCarlo.class.getDeclaredMethod("didIWin", cArg);
@@ -42,7 +42,7 @@ public class PlayerMonteCarloTest {
 
             for (int i = 1; i < 10; i++) {
                 String filename = "testInputFiles/Table/tableTest" + i + ".txt";
-                Table t = new Table(filename);
+                Board t = new Board(filename);
                 assertEquals("tableTest" + i + ".txt: won player \"1\": " + solutions[i - 1], solutions[i - 1], method.invoke(pmc, t, (byte) 0));
                 assertEquals("tableTest" + i + ".txt: won player \"2\": " + !solutions[i - 1], !solutions[i - 1], method.invoke(pmc, t, (byte) 1));
             }
