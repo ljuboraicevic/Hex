@@ -35,13 +35,13 @@ public class Hex {
         playMonteCarloRandomRecordedGames(
                 "TrainingSet1",     //file
                 7,                  //board size
-                10,                 //number of games
+                1000,                 //number of games
                 2,                  //paralelization
                 5,                  //number of players
-                20, 10,             // for each player pair (number of repetitions, frequency)
+                20, 10,             // for each player number of repetitions, frequency
                 100, 15,            
                 500, 10,
-                1000, 15,
+                1000, 30,
                 5000, 5
         );
     }
@@ -97,7 +97,7 @@ public class Hex {
         
         SpecialFrequencyTable ft = new SpecialFrequencyTable(players, frequencies);
         
-        try (Writer writer = new BufferedWriter(new FileWriter(new File(file)))) {
+        try (Writer writer = new BufferedWriter(new FileWriter(new File(file),true))) {
             for (int iCount = 0; iCount < noOfGames; iCount++) {
                 Board board = new Board(boardSize);
                 PlayerMonteCarlo first = ft.getPlayer();
