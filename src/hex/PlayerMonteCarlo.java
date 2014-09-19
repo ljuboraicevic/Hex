@@ -31,6 +31,10 @@ public class PlayerMonteCarlo implements Player {
         this.threads = threads;
     }
     
+    public int getNumberOfRepetitions(){
+        return this.repetitions;
+    }
+    
     @Override
     public Coordinate makeMove(Board t) {
         return makeMoveWithProbability(t).getCoordinates();
