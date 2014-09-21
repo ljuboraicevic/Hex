@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 
 /**
  *
@@ -19,7 +21,7 @@ public class Hex {
      */
     public static void main(String[] args) throws IOException {
 //        playRegularGames(
-//                new PlayerNeuralNetwork("1.nnet"),       //first player
+//                new PlayerNeuralNetwork("SuperFastNN.nnet"),       //first player
 //                new PlayerMonteCarlo(10, 2),       //second player
 //                11,                                 //board size
 //                10);                                //number of games
@@ -33,15 +35,28 @@ public class Hex {
 //                "TrainingSet1");   //file
         
         playMonteCarloRandomRecordedGames(
-                "TrainingSet1",     //file
+                "TrainingSet",          //file
                 7,                  //board size
-                1000,                 //number of games
+                1000,                //number of games
                 2,                  //paralelization
                 5,                  //number of players
                 20, 10,             // for each player number of repetitions, frequency
                 100, 15,            
-                500, 10,
-                1000, 30,
+                500, 15,
+                1000, 40,
+                5000, 5
+        );
+        
+        playMonteCarloRandomRecordedGames(
+                "TestSet",          //file
+                7,                  //board size
+                500,                //number of games
+                2,                  //paralelization
+                5,                  //number of players
+                20, 10,             // for each player number of repetitions, frequency
+                100, 15,            
+                500, 15,
+                1000, 40,
                 5000, 5
         );
     }
@@ -72,9 +87,14 @@ public class Hex {
                 Board board = new Board(boardSize);
                 PlayerMonteCarlo first = new PlayerMonteCarlo(MCRepetitionsPlayer1, paralelization);
                 PlayerMonteCarlo second = new PlayerMonteCarlo(MCRepetitionsPlayer2, paralelization);
-                GameRecordedMonteCarlo g = new GameRecordedMonteCarlo(board, first, second, MCRepetitionsPlayer1);
-                g.play();
-                writer.write(g.gameStats());
+                GameRecordedMonteCarlo g = new GameRecordedMonteCarlo(board, first, second);
+                try {
+                    g.play();
+                    writer.write(g.gameStats());
+                } catch (NullPointerException e){
+                } catch (Exception e){
+                    System.out.println(e.getMessage());
+                }
             }
             writer.flush();
         }
@@ -90,9 +110,12 @@ public class Hex {
         LinkedList<PlayerMonteCarlo> players = new LinkedList<PlayerMonteCarlo>();
         LinkedList<Integer> frequencies = new LinkedList<Integer>();
 
+        HashMap<Integer,Integer> counter = new HashMap<>();
+        
         for(int i = 0; i < numberOfPlayers; i++){
             players.add(new PlayerMonteCarlo(args[i * 2], paralelization));
             frequencies.add(args[i * 2 + 1]);
+            counter.put(args[i * 2], 0);
         }
         
         SpecialFrequencyTable ft = new SpecialFrequencyTable(players, frequencies);
@@ -102,15 +125,29 @@ public class Hex {
                 Board board = new Board(boardSize);
                 PlayerMonteCarlo first = ft.getPlayer();
                 PlayerMonteCarlo second = ft.getPlayer();
+                counter.put(first.getNumberOfRepetitions(),
+                        counter.get(first.getNumberOfRepetitions()) + 1);
+                counter.put(second.getNumberOfRepetitions(),
+                        counter.get(second.getNumberOfRepetitions()) + 1);
                 GameRecordedMonteCarlo g = new GameRecordedMonteCarlo(board, 
-                        first, second, first.getNumberOfRepetitions());
+                        first, second);
                 System.out.println("Starting game "+(iCount+1)+":\n"+
                         "Player1 (MonteCarlo) "+ first.getNumberOfRepetitions()+
                         "\nPlayer2 (MonteCarlo) "+ second.getNumberOfRepetitions());
-                g.play();
-                writer.write(g.gameStats());
+                try {
+                    g.play();
+                    writer.write(g.gameStats());
+                } catch (NullPointerException e){
+                } catch (Exception e){
+                    System.out.println(e.getMessage());
+                }
+                
             }
             writer.flush();
+        }
+        System.out.println("Games per player:");
+        for(Entry<Integer, Integer> e : counter.entrySet()){
+            System.out.println(e.getKey() + " - " + e.getValue());
         }
     }
 }

@@ -13,11 +13,7 @@ public class GameRecordedMonteCarlo extends Game {
      */
     protected final PlayerMonteCarlo[] players;
     
-    /**
-     * Number of repetitions.
-     */
-    protected int repetitions;
-    
+      
     /**
      * Array of moves played. Used in statistic.
      */
@@ -27,8 +23,8 @@ public class GameRecordedMonteCarlo extends Game {
     public GameRecordedMonteCarlo(
             Board b, 
             PlayerMonteCarlo first, 
-            PlayerMonteCarlo second,
-            int repetitions) {
+            PlayerMonteCarlo second
+    ) {
         
         super(b, first, second);
         this.players = new PlayerMonteCarlo[2];
@@ -36,7 +32,6 @@ public class GameRecordedMonteCarlo extends Game {
         this.players[1] = second;
         this.moves = new LinkedList<>();
         this.probabilities = new LinkedList<>();
-        this.repetitions = repetitions;
     }
 
     @Override
@@ -88,14 +83,21 @@ public class GameRecordedMonteCarlo extends Game {
         return this.probabilities;
     }
     
-    public String gameStats() {
+    public String gameStats() throws Exception {
         StringBuilder sb = new StringBuilder();
         
         for (int moveCount = 0; moveCount < this.moves.size(); moveCount++) {
             Board move = this.moves.get(moveCount);
             sb.append(move.toSingleRowString(moveCount % 2 != 0));
+            int repetitions = moveCount % 2 == 0 ? 
+                    this.players[0].getNumberOfRepetitions() : 
+                    this.players[1].getNumberOfRepetitions();
+            
             //get the relative number of wins (# of wins divided by repetitions)
             double prob = this.probabilities.get(moveCount) / repetitions;
+            if( prob > 1.0 ){
+                throw new Exception("Probability greater than one: "+ prob);
+            }
             sb.append(prob);
             sb.append(System.lineSeparator());
         }
