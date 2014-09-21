@@ -21,23 +21,23 @@ public class Hex {
      */
     public static void main(String[] args) throws IOException {
 //        playRegularGames(
-//                new PlayerNeuralNetwork("SuperFastNN.nnet"),       //first player
-//                new PlayerMonteCarlo(10, 2),       //second player
-//                11,                                 //board size
+//                new PlayerNeuralNetwork("NewNeuralNetwork3.nnet"),       //first player
+//                new PlayerMonteCarlo(10,1),       //second player
+//                7,                                 //board size
 //                10);                                //number of games
         
 //        playMonteCarloRecordedGames(
-//                1500,              //first player Monte Carlo repetitions
-//                1500,              //second player Monte Carlo repetitions
-//                11,                //board size
-//                15,                 //number of games
+//                1000,              //first player Monte Carlo repetitions
+//                1000,              //second player Monte Carlo repetitions
+//                7,                //board size
+//                10,                 //number of games
 //                2,                 //paralelization
-//                "TrainingSet1");   //file
+//                "TrainingSet100");   //file
         
         playMonteCarloRandomRecordedGames(
-                "TrainingSet",          //file
+                "NewTrainingSet2",          //file
                 7,                  //board size
-                1000,                //number of games
+                50,                //number of games
                 2,                  //paralelization
                 5,                  //number of players
                 20, 10,             // for each player number of repetitions, frequency
@@ -48,9 +48,9 @@ public class Hex {
         );
         
         playMonteCarloRandomRecordedGames(
-                "TestSet",          //file
+                "NewTestSet2",          //file
                 7,                  //board size
-                500,                //number of games
+                25,                //number of games
                 2,                  //paralelization
                 5,                  //number of players
                 20, 10,             // for each player number of repetitions, frequency
@@ -91,6 +91,7 @@ public class Hex {
                 try {
                     g.play();
                     writer.write(g.gameStats());
+                    writer.write(g.additionalGameStats());
                 } catch (NullPointerException e){
                 } catch (Exception e){
                     System.out.println(e.getMessage());
@@ -137,6 +138,8 @@ public class Hex {
                 try {
                     g.play();
                     writer.write(g.gameStats());
+                    writer.write(g.additionalGameStats());
+
                 } catch (NullPointerException e){
                 } catch (Exception e){
                     System.out.println(e.getMessage());

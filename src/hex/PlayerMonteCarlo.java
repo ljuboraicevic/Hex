@@ -37,10 +37,10 @@ public class PlayerMonteCarlo implements Player {
     
     @Override
     public Coordinate makeMove(Board t) {
-        return makeMoveWithProbability(t).getCoordinates();
+        return makeMoveWithProbability(t)[0].getCoordinates();
     }
     
-    public MCSimulationMove makeMoveWithProbability(Board b) {
+    public MCSimulationMove[] makeMoveWithProbability(Board b) {
         //make a deep copy of the board for each thread
         Board[] boardCopies = new Board[threads];
         for (int iCount = 0; iCount < threads; iCount++) {
@@ -64,7 +64,7 @@ public class PlayerMonteCarlo implements Player {
                     b,
                     emptyFields, 
                     iCount * fields, 
-                    (iCount + 1) * fields - 1, 
+                    (iCount + 1) * fields , 
                     repetitions, 
                     movesPlayed, 
                     player);
@@ -76,7 +76,7 @@ public class PlayerMonteCarlo implements Player {
                 b,
                 emptyFields, 
                 iCount * fields, 
-                noOfEmptyFields - 1, 
+                noOfEmptyFields, 
                 repetitions, 
                 movesPlayed, 
                 player);
@@ -98,6 +98,9 @@ public class PlayerMonteCarlo implements Player {
         Coordinate bestField = null;
         int bestResult = -1;
         
+        //creating array of all moves
+        MCSimulationMove[] allMoves = new MCSimulationMove[noOfEmptyFields + 1];
+        
         //go through each of the threads' best results and choose the best one
         for (iCount = 0; iCount < threads; iCount++) {
             int currentBest = simArray[iCount].getBestResult();
@@ -106,8 +109,18 @@ public class PlayerMonteCarlo implements Player {
                 bestField = simArray[iCount].getBestField();
             }
         }
+        //first move is best one
+        allMoves[0] = new MCSimulationMove(bestField, (double)bestResult);
         
-        return new MCSimulationMove(bestField, (double)bestResult);
+        int counter = 1;
+        //copying moves from thread - simulation to one array
+        for (int jCount = 0; jCount < threads; jCount++) {
+            MCSimulationMove[] help = simArray[jCount].getAllMoves();
+            for(iCount = 0; iCount < help.length; iCount++){
+                allMoves[counter++] = new MCSimulationMove(help[iCount].getCoordinates(), help[iCount].getProbability());
+            }
+        }
+        return allMoves;
     }
     
     /**

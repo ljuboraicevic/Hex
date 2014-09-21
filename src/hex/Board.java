@@ -87,6 +87,15 @@ public class Board {
         return false;
     }
 
+    public boolean removeMark(Coordinate c){
+        if(!isFieldMarked(c)){
+            return false;
+        } else {
+            matrix[c.row][c.col] = 0;
+            return true;
+        }
+    }
+    
     public byte whosOnTheMove() {
         return nextMovePlayer;
     }

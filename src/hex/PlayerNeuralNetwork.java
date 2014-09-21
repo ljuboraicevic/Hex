@@ -1,6 +1,13 @@
 package hex;
 
+import java.io.File;
 import org.neuroph.core.NeuralNetwork;
+import org.neuroph.core.learning.SupervisedTrainingElement;
+import org.neuroph.core.learning.TrainingSet;
+import org.neuroph.nnet.MultiLayerPerceptron;
+import static org.neuroph.nnet.flat.FlatLearningType.BackPropagation;
+import org.neuroph.nnet.learning.BackPropagation;
+import org.neuroph.util.TransferFunctionType;
 
 /**
  *
@@ -18,8 +25,17 @@ public class PlayerNeuralNetwork implements Player{
      * 
      * @param f Neural network file
      */
-    public PlayerNeuralNetwork(String f) {
+public PlayerNeuralNetwork(String f) {
         nn = NeuralNetwork.load(f);
+//        System.out.println("learning...");
+//        TrainingSet<SupervisedTrainingElement> trainingSet;// = new TrainingSet<>(49, 1);
+//        trainingSet = TrainingSet.createFromFile("TrainingSet", 49, 1, " ");
+//        nn = new MultiLayerPerceptron(TransferFunctionType.SIGMOID, 49, 49, 1);
+//        BackPropagation learningRule = (BackPropagation) nn.getLearningRule();
+//        learningRule.setLearningRate(0.2);
+//        nn.learn(trainingSet);
+//        nn.save(f);
+//        System.out.println("learning finished");
     }
     
     @Override

@@ -19,6 +19,10 @@ public class GameRecordedMonteCarlo extends Game {
      */
     protected LinkedList<Board> moves;
     protected LinkedList<Double> probabilities;
+    /**
+     * Linked list of arrays of all possible moves with respective probabilities
+     */
+    protected LinkedList<MCSimulationMove[]> unplayedMoves;
     
     public GameRecordedMonteCarlo(
             Board b, 
@@ -32,6 +36,7 @@ public class GameRecordedMonteCarlo extends Game {
         this.players[1] = second;
         this.moves = new LinkedList<>();
         this.probabilities = new LinkedList<>();
+        this.unplayedMoves = new LinkedList<MCSimulationMove[]>();
     }
 
     @Override
@@ -41,29 +46,32 @@ public class GameRecordedMonteCarlo extends Game {
         //while game isn't over
         while (winningPlayer == 0) {
             //players take turns based on number of moves played so far
-            MCSimulationMove move = players[movesPlayed % 2].makeMoveWithProbability(board);
+            MCSimulationMove[] allPossibleMoves = players[movesPlayed % 2].makeMoveWithProbability(board);
 
+            //first move is one with heighest probability - by convention
             //players[0]'s mark is 1 and player[1]'s mark is 2
-            board.putMark(move.getCoordinates(), (byte) (movesPlayed % 2 + 1));
+            board.putMark(allPossibleMoves[0].getCoordinates(), (byte) (movesPlayed % 2 + 1));
 
             //add board to moves
             moves.add(board.deepCopy());
             //add probabilities
-            probabilities.add(move.getProbability());
+            probabilities.add(allPossibleMoves[0].getProbability());
+            
+            unplayedMoves.add(allPossibleMoves);
             
             //connect the field to its neighbors of the same color
             Coordinate[] sameColorNeighbors = 
-                    findFieldsNeighborsOfSameColor(move.getCoordinates());
+                    findFieldsNeighborsOfSameColor(allPossibleMoves[0].getCoordinates());
 
             for (Coordinate neighbor : sameColorNeighbors) {
-                unionFind.union(getFieldIndex(move.getCoordinates()), 
+                unionFind.union(getFieldIndex(allPossibleMoves[0].getCoordinates()), 
                         getFieldIndex(neighbor));
             }
 
             //check if added nodes need to get connected
-            if (isFieldOnPlayersEdge(move.getCoordinates())) {
-                unionFind.union(getFieldIndex(move.getCoordinates()), 
-                        getIndexOfAddedNodeInUF(move.getCoordinates()));
+            if (isFieldOnPlayersEdge(allPossibleMoves[0].getCoordinates())) {
+                unionFind.union(getFieldIndex(allPossibleMoves[0].getCoordinates()), 
+                        getIndexOfAddedNodeInUF(allPossibleMoves[0].getCoordinates()));
             }
 
             movesPlayed++;
@@ -82,7 +90,11 @@ public class GameRecordedMonteCarlo extends Game {
     public LinkedList<Double> getProbabilities() {
         return this.probabilities;
     }
-    
+    /**
+     * creates regular game stats, containing only moves that are played
+     * @return
+     * @throws Exception 
+     */
     public String gameStats() throws Exception {
         StringBuilder sb = new StringBuilder();
         
@@ -103,5 +115,52 @@ public class GameRecordedMonteCarlo extends Game {
         }
         
         return sb.toString();
+    }
+    
+    /**
+     * creating additional stats, contains moves that are played and those that
+     * were not played
+     * @return
+     * @throws Exception 
+     */
+    public String additionalGameStats() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        //create emptyboard
+        Board copyBoard = new Board(this.moves.get(0).size);
+        
+        int length = this.unplayedMoves.get(0).length;
+        MCSimulationMove[] a = this.unplayedMoves.get(0);
+        //insert all first moves probabilities on empty board
+        for(int i = 0; i < length; i++){
+            copyBoard.putMark(this.unplayedMoves.get(0)[i].getCoordinates(), (byte)1);
+            sb.append(copyBoard.toSingleRowString(false));
+            sb.append(this.unplayedMoves.get(0)[i].getProbability() / players[0].getNumberOfRepetitions());
+            sb.append(System.lineSeparator());
+            copyBoard.removeMark(this.unplayedMoves.get(0)[i].getCoordinates());
+        }
+        int size = this.moves.size();
+        //for all other unplayed moves, play on board after previous move 
+        
+        for (int i = 1; i < this.moves.size(); i++){
+            //copy board as is after previous move
+            copyBoard = this.moves.get(i-1).deepCopy();
+            int repetitions = i % 2 == 0 ? 
+                    this.players[0].getNumberOfRepetitions() : 
+                    this.players[1].getNumberOfRepetitions();
+            length = this.unplayedMoves.get(i).length;
+            for(int j = 0; j < length; j++){
+                //add unplayed move on board
+                copyBoard.putMark(this.unplayedMoves.get(i)[j].getCoordinates(), (byte)(i % 2 + 1));
+                //write stats
+                sb.append(copyBoard.toSingleRowString(i % 2 != 0));
+                sb.append(this.unplayedMoves.get(i)[j].getProbability() / repetitions);
+                sb.append(System.lineSeparator());
+                //remove unplayed move
+                copyBoard.removeMark(this.unplayedMoves.get(i)[j].getCoordinates());
+            }
+        }
+        
+        return sb.toString();
+
     }
 }

@@ -52,6 +52,11 @@ public class MonteCarloSimulation extends Thread{
     private Coordinate bestField;
     
     /**
+     * Used to store coordinates of all possible moves and results for mc simulations
+     */
+    private MCSimulationMove[] possibleMoves;
+    
+    /**
      * How many moves have been played so far.
      */
     private final int movesPlayed;
@@ -92,6 +97,7 @@ public class MonteCarloSimulation extends Thread{
         this.bestField = null;
         this.movesPlayed = movesPlayed;
         this.player = player;
+        this.possibleMoves = new MCSimulationMove[to - from];
     }
 
     @Override
@@ -99,7 +105,7 @@ public class MonteCarloSimulation extends Thread{
         //for each of the empty fields on the board that was assigned to 
         //this thread
         for (int field = from; field < to; field++) {
-        
+
             int thisFieldWinSum = 0;
             
             //mark current "empty" field as this player's and then run the
@@ -128,6 +134,9 @@ public class MonteCarloSimulation extends Thread{
                     thisFieldWinSum++;
                 }
             }
+            
+            this.possibleMoves[field - from] = new MCSimulationMove(emptyFields[field],
+                1.0 * thisFieldWinSum);
         
             //if this field is the best so far
             if (thisFieldWinSum > bestResult) {
@@ -154,4 +163,9 @@ public class MonteCarloSimulation extends Thread{
     public int getBestResult() {
         return bestResult;
     }
+    
+    public MCSimulationMove[] getAllMoves(){
+        return this.possibleMoves;
+    }
+    
 }
