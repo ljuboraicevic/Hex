@@ -20,45 +20,25 @@ public class Hex {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
-//        playRegularGames(
-//                new PlayerNeuralNetwork("NewNeuralNetwork3.nnet"),       //first player
-//                new PlayerMonteCarlo(10,1),       //second player
-//                7,                                 //board size
-//                10);                                //number of games
-        
+              int i = 0;while(i++<100){ playRegularGames(
+                new PlayerNeuralNetwork("normalized.nnet"),       //second player
+                                       new PlayerNeuralNetwork("notNormalized.nnet"),       //first player
+
+                7,                                 //board size
+                1);                                //number of games
+              }
 //        playMonteCarloRecordedGames(
-//                1000,              //first player Monte Carlo repetitions
-//                1000,              //second player Monte Carlo repetitions
-//                7,                //board size
-//                10,                 //number of games
-//                2,                 //paralelization
-//                "TrainingSet100");   //file
-        
-        playMonteCarloRandomRecordedGames(
-                "NewTrainingSet2",          //file
-                7,                  //board size
-                50,                //number of games
-                2,                  //paralelization
-                5,                  //number of players
-                20, 10,             // for each player number of repetitions, frequency
-                100, 15,            
-                500, 15,
-                1000, 40,
-                5000, 5
-        );
-        
-        playMonteCarloRandomRecordedGames(
-                "NewTestSet2",          //file
-                7,                  //board size
-                25,                //number of games
-                2,                  //paralelization
-                5,                  //number of players
-                20, 10,             // for each player number of repetitions, frequency
-                100, 15,            
-                500, 15,
-                1000, 40,
-                5000, 5
-        );
+//                10000,               //first player Monte Carlo repetitions
+//                100,                  //second player Monte Carlo repetitions
+//                7,                  //board size
+//                30,                  //number of games
+//                2,                  //paralelization
+//                "TrainingSetNonNormalized",     //file
+//                true,               //randomize best
+//                true,               //record only first players move
+//                false                //normalize probabilities
+//        );   
+////        
     }
     
     private static void playRegularGames(
@@ -73,6 +53,7 @@ public class Hex {
             g.play();
         }
     }
+    
 
     private static void playMonteCarloRecordedGames(
             int MCRepetitionsPlayer1, 
@@ -80,18 +61,21 @@ public class Hex {
             int boardSize,
             int noOfGames,
             int paralelization, 
-            String file) throws IOException {
+            String file,
+            boolean recordOnlyFirstPlayerMoves,
+            boolean normalizeProbabilities,
+            boolean randomBest) throws IOException {
         
-        try (Writer writer = new BufferedWriter(new FileWriter(new File(file)))) {
+        try (Writer writer = new BufferedWriter(new FileWriter(new File(file),true))) {
             for (int iCount = 0; iCount < noOfGames; iCount++) {
                 Board board = new Board(boardSize);
-                PlayerMonteCarlo first = new PlayerMonteCarlo(MCRepetitionsPlayer1, paralelization);
-                PlayerMonteCarlo second = new PlayerMonteCarlo(MCRepetitionsPlayer2, paralelization);
-                GameRecordedMonteCarlo g = new GameRecordedMonteCarlo(board, first, second);
+                PlayerMonteCarlo first = new PlayerMonteCarlo(MCRepetitionsPlayer1, paralelization, randomBest);
+                PlayerMonteCarlo second = new PlayerMonteCarlo(MCRepetitionsPlayer2, paralelization, randomBest);
+                GameRecordedMonteCarlo g = new GameRecordedMonteCarlo(board, first, second, normalizeProbabilities);
                 try {
                     g.play();
-                    writer.write(g.gameStats());
-                    writer.write(g.additionalGameStats());
+                //    writer.write(g.gameStats());
+                    writer.write(g.additionalGameStats(recordOnlyFirstPlayerMoves));
                 } catch (NullPointerException e){
                 } catch (Exception e){
                     System.out.println(e.getMessage());
@@ -105,6 +89,7 @@ public class Hex {
             int boardSize,
             int noOfGames,
             int paralelization,
+            boolean recordOnlyFirstPlayerMoves,
             int numberOfPlayers,
             int...args) throws IOException {
         
@@ -114,7 +99,7 @@ public class Hex {
         HashMap<Integer,Integer> counter = new HashMap<>();
         
         for(int i = 0; i < numberOfPlayers; i++){
-            players.add(new PlayerMonteCarlo(args[i * 2], paralelization));
+            players.add(new PlayerMonteCarlo(args[i * 2], paralelization,false));
             frequencies.add(args[i * 2 + 1]);
             counter.put(args[i * 2], 0);
         }
@@ -131,14 +116,14 @@ public class Hex {
                 counter.put(second.getNumberOfRepetitions(),
                         counter.get(second.getNumberOfRepetitions()) + 1);
                 GameRecordedMonteCarlo g = new GameRecordedMonteCarlo(board, 
-                        first, second);
+                        first, second, false);
                 System.out.println("Starting game "+(iCount+1)+":\n"+
                         "Player1 (MonteCarlo) "+ first.getNumberOfRepetitions()+
                         "\nPlayer2 (MonteCarlo) "+ second.getNumberOfRepetitions());
                 try {
                     g.play();
-                    writer.write(g.gameStats());
-                    writer.write(g.additionalGameStats());
+            //        writer.write(g.gameStats());
+                    writer.write(g.additionalGameStats(recordOnlyFirstPlayerMoves));
 
                 } catch (NullPointerException e){
                 } catch (Exception e){

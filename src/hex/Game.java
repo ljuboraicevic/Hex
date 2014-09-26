@@ -76,7 +76,6 @@ public class Game {
 
             //players[0]'s mark is 1 and player[1]'s mark is 2
             board.putMark(move, (byte) (movesPlayed % 2 + 1));
-            
             //connect the field to its neighbors of the same color
             Coordinate[] sameColorNeighbors = findFieldsNeighborsOfSameColor(move);
 

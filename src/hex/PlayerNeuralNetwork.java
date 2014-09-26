@@ -25,14 +25,15 @@ public class PlayerNeuralNetwork implements Player{
      * 
      * @param f Neural network file
      */
-public PlayerNeuralNetwork(String f) {
-        nn = NeuralNetwork.load(f);
-//        System.out.println("learning...");
+    public PlayerNeuralNetwork(String f) {
+          nn = NeuralNetwork.load(f);
+//        System.out.println("learning..." + f);
 //        TrainingSet<SupervisedTrainingElement> trainingSet;// = new TrainingSet<>(49, 1);
-//        trainingSet = TrainingSet.createFromFile("TrainingSet", 49, 1, " ");
-//        nn = new MultiLayerPerceptron(TransferFunctionType.SIGMOID, 49, 49, 1);
+//        trainingSet = TrainingSet.createFromFile("TrainingSetNonNormalized", 49, 1, " ");
+//        nn = new MultiLayerPerceptron(TransferFunctionType.SIGMOID, 49, 25, 1);
 //        BackPropagation learningRule = (BackPropagation) nn.getLearningRule();
 //        learningRule.setLearningRate(0.2);
+//        nn.randomizeWeights();
 //        nn.learn(trainingSet);
 //        nn.save(f);
 //        System.out.println("learning finished");
@@ -74,7 +75,6 @@ public PlayerNeuralNetwork(String f) {
                 bestField = emptyFields[field];
             }
         }
-        
         return bestField;
     }
     

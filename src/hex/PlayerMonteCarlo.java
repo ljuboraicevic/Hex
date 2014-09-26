@@ -1,5 +1,7 @@
 package hex;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,16 +21,24 @@ public class PlayerMonteCarlo implements Player {
      * How many threads should be used when doing the simulation.
      */
     private final int threads;
-
+    
+    /**
+     * if there are two or more results with best result, should return first one
+     * or randomly chosen
+     */
+    private final boolean randomizeBest;
     /**
      * Initializes a new PlayerMonteCarlo.
      * 
      * @param repetitions Monte Carlo simulation repetitions
      * @param threads How many threads to use during the simulation
+     * @param randomizeBest if there are two or more results with best result, 
+     * should return first one or randomly chose among them
      */
-    public PlayerMonteCarlo(int repetitions, int threads) {
+    public PlayerMonteCarlo(int repetitions, int threads, boolean randomizeBest) {
         this.repetitions = repetitions;
         this.threads = threads;
+        this.randomizeBest = randomizeBest;
     }
     
     public int getNumberOfRepetitions(){
@@ -95,30 +105,49 @@ public class PlayerMonteCarlo implements Player {
             }
         }
         
-        Coordinate bestField = null;
-        int bestResult = -1;
+        
         
         //creating array of all moves
-        MCSimulationMove[] allMoves = new MCSimulationMove[noOfEmptyFields + 1];
+        MCSimulationMove[] allMoves = new MCSimulationMove[noOfEmptyFields];
+//        
+//        Coordinate bestField = null;
+//        int bestResult = -1;
+//        //go through each of the threads' best results and choose the best one
+//        for (iCount = 0; iCount < threads; iCount++) {
+//            int currentBest = simArray[iCount].getBestResult();
+//            if (currentBest > bestResult) {
+//                bestResult = currentBest;
+//                bestField = simArray[iCount].getBestField();
+//            }
+//        }
+//        //first move is best one
+//        allMoves[0] = new MCSimulationMove(bestField, (double)bestResult);
         
-        //go through each of the threads' best results and choose the best one
-        for (iCount = 0; iCount < threads; iCount++) {
-            int currentBest = simArray[iCount].getBestResult();
-            if (currentBest > bestResult) {
-                bestResult = currentBest;
-                bestField = simArray[iCount].getBestField();
-            }
-        }
-        //first move is best one
-        allMoves[0] = new MCSimulationMove(bestField, (double)bestResult);
-        
-        int counter = 1;
+        int counter = 0;
         //copying moves from thread - simulation to one array
         for (int jCount = 0; jCount < threads; jCount++) {
             MCSimulationMove[] help = simArray[jCount].getAllMoves();
             for(iCount = 0; iCount < help.length; iCount++){
                 allMoves[counter++] = new MCSimulationMove(help[iCount].getCoordinates(), help[iCount].getProbability());
             }
+        }
+        Arrays.sort(allMoves,Comparator.reverseOrder());
+        
+        if(this.randomizeBest && allMoves.length > 1){
+            int numberOfBestResults = 0;
+            //how many best results exists
+            while (numberOfBestResults!= allMoves.length - 1 && 
+            allMoves[numberOfBestResults].compareTo(allMoves[numberOfBestResults + 1]) == 0){
+                numberOfBestResults++;
+            }
+            if( numberOfBestResults > 1){
+                int randomIndex = (int) Math.floor(Math.random() * numberOfBestResults);
+                MCSimulationMove temp = new MCSimulationMove(allMoves[randomIndex].getCoordinates(), 
+                allMoves[randomIndex].getProbability());
+                allMoves[randomIndex] = new MCSimulationMove(
+                allMoves[0].getCoordinates(), allMoves[0].getProbability());
+                allMoves[0] = temp;
+            }                        
         }
         return allMoves;
     }
