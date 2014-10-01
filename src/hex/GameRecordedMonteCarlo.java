@@ -136,53 +136,6 @@ public class GameRecordedMonteCarlo extends Game {
      * creating additional stats, contains moves that are played and those that
      * were not played
      *
-     * @return
-     * @throws Exception
-     */
-//    private String additionalGameStats() throws Exception {
-//        StringBuilder sb = new StringBuilder();
-//        //create emptyboard
-//        Board copyBoard = new Board(this.moves.get(0).size);
-//        
-//        int length = this.unplayedMoves.get(0).length;
-//        MCSimulationMove[] a = this.unplayedMoves.get(0);
-//        //insert all first moves probabilities on empty board
-//        for(int i = 0; i < length; i++){
-//            copyBoard.putMark(this.unplayedMoves.get(0)[i].getCoordinates(), (byte)1);
-//            sb.append(copyBoard.toSingleRowString(false));
-//            sb.append(this.unplayedMoves.get(0)[i].getProbability() / players[0].getNumberOfRepetitions());
-//            sb.append(System.lineSeparator());
-//            copyBoard.removeMark(this.unplayedMoves.get(0)[i].getCoordinates());
-//        }
-//        int size = this.moves.size();
-//        //for all other unplayed moves, play on board after previous move 
-//        
-//        for (int i = 1; i < this.moves.size(); i++){
-//            //copy board as is after previous move
-//            copyBoard = this.moves.get(i-1).deepCopy();
-//            int repetitions = i % 2 == 0 ? 
-//                    this.players[0].getNumberOfRepetitions() : 
-//                    this.players[1].getNumberOfRepetitions();
-//            length = this.unplayedMoves.get(i).length;
-//            for(int j = 0; j < length; j++){
-//                //add unplayed move on board
-//                copyBoard.putMark(this.unplayedMoves.get(i)[j].getCoordinates(), (byte)(i % 2 + 1));
-//                //write stats
-//                sb.append(copyBoard.toSingleRowString(i % 2 != 0));
-//                sb.append(this.unplayedMoves.get(i)[j].getProbability() / repetitions);
-//                sb.append(System.lineSeparator());
-//                //remove unplayed move
-//                copyBoard.removeMark(this.unplayedMoves.get(i)[j].getCoordinates());
-//            }
-//        }
-//        
-//        return sb.toString();
-//
-//    }
-    /**
-     * creating additional stats, contains moves that are played and those that
-     * were not played
-     *
      * @param firstPlayerOnly - should write only moves of first player - used
      * when neural network wants to learn only from one player
      * @param normalize - should probabilities be normalized

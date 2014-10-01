@@ -20,13 +20,12 @@ public class Hex {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
-              int i = 0;while(i++<100){ playRegularGames(
-                new PlayerNeuralNetwork("normalized.nnet"),       //second player
-                                       new PlayerNeuralNetwork("notNormalized.nnet"),       //first player
-
-                7,                                 //board size
-                1);                                //number of games
-              }
+        playRegularGames(
+            new PlayerNeuralNetwork("normalized.nnet"),       //second player
+            new PlayerMonteCarlo(10,1,true),       //first player
+            7,                                 //board size
+            1);                                //number of games
+            
 //        playMonteCarloRecordedGames(
 //                10000,               //first player Monte Carlo repetitions
 //                100,                  //second player Monte Carlo repetitions

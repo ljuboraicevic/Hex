@@ -50,6 +50,12 @@ public class PlayerMonteCarlo implements Player {
         return makeMoveWithProbability(t)[0].getCoordinates();
     }
     
+    /**
+     * Returns array of MCSimulationMove that contains all possible moves and 
+     * their possibilities. First element in array is best move, chosen by MonteCarlo
+     * @param b
+     * @return 
+     */
     public MCSimulationMove[] makeMoveWithProbability(Board b) {
         //make a deep copy of the board for each thread
         Board[] boardCopies = new Board[threads];
@@ -109,19 +115,6 @@ public class PlayerMonteCarlo implements Player {
         
         //creating array of all moves
         MCSimulationMove[] allMoves = new MCSimulationMove[noOfEmptyFields];
-//        
-//        Coordinate bestField = null;
-//        int bestResult = -1;
-//        //go through each of the threads' best results and choose the best one
-//        for (iCount = 0; iCount < threads; iCount++) {
-//            int currentBest = simArray[iCount].getBestResult();
-//            if (currentBest > bestResult) {
-//                bestResult = currentBest;
-//                bestField = simArray[iCount].getBestField();
-//            }
-//        }
-//        //first move is best one
-//        allMoves[0] = new MCSimulationMove(bestField, (double)bestResult);
         
         int counter = 0;
         //copying moves from thread - simulation to one array
@@ -131,16 +124,19 @@ public class PlayerMonteCarlo implements Player {
                 allMoves[counter++] = new MCSimulationMove(help[iCount].getCoordinates(), help[iCount].getProbability());
             }
         }
-        Arrays.sort(allMoves,Comparator.reverseOrder());
+        
+        Arrays.sort(allMoves, Comparator.reverseOrder());
         
         if(this.randomizeBest && allMoves.length > 1){
             int numberOfBestResults = 0;
-            //how many best results exists
+            //determine how many best results exists
             while (numberOfBestResults!= allMoves.length - 1 && 
             allMoves[numberOfBestResults].compareTo(allMoves[numberOfBestResults + 1]) == 0){
                 numberOfBestResults++;
             }
-            if( numberOfBestResults > 1){
+            //if more then one best result
+            if(numberOfBestResults > 1){
+                //chose randomly one
                 int randomIndex = (int) Math.floor(Math.random() * numberOfBestResults);
                 MCSimulationMove temp = new MCSimulationMove(allMoves[randomIndex].getCoordinates(), 
                 allMoves[randomIndex].getProbability());
