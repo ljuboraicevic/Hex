@@ -1,5 +1,6 @@
 package hex;
 
+import hex.randomboards.RandomBoardGenerator;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -20,12 +21,16 @@ public class Hex {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
-        playRegularGames(
-            new PlayerNeuralNetwork("normalized.nnet"),       //second player
-            new PlayerMonteCarlo(10,1,true),       //first player
-            7,                                 //board size
-            1);                                //number of games
-            
+//        playRegularGames(
+//            new PlayerNeuralNetwork("normalized.nnet"),       //second player
+//            new PlayerMonteCarlo(10,1,true),       //first player
+//            7,                                 //board size
+//            1);                                //number of games
+
+        Board b = new Board(5);
+        LinkedList<MCSimulationMove[]> r = 
+                RandomBoardGenerator.evaluateRandomBoards(b, 10, 10, 2, 6);
+        
 //        playMonteCarloRecordedGames(
 //                10000,               //first player Monte Carlo repetitions
 //                100,                  //second player Monte Carlo repetitions

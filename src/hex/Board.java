@@ -161,6 +161,8 @@ public class Board {
             }
         }
         
+        result.noOfEmptyFields = this.noOfEmptyFields;
+        
         return result;
     }
 
@@ -217,5 +219,21 @@ public class Board {
 
     public boolean isFieldVertical(Coordinate c) {
         return matrix[c.row][c.col] == 1;
+    }
+
+    public int getSize() {
+        return size;
+    }
+    
+    public Coordinate intToCoordinate(int i) throws IndexOutOfBoundsException {
+        if (size*size <= i) { 
+            throw new IndexOutOfBoundsException(
+                    "i is greater than the size of the board."); 
+        }
+        
+        int row = i / size;
+        int col = i % size;
+        Coordinate result = new Coordinate(row, col);
+        return result;
     }
 }
