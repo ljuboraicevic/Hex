@@ -92,6 +92,8 @@ public class Board {
             return false;
         } else {
             matrix[c.row][c.col] = 0;
+            noOfEmptyFields++;
+            nextMovePlayer = (byte) ((nextMovePlayer + 1) % 2);
             return true;
         }
     }

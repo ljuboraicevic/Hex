@@ -67,12 +67,12 @@ public class RandomBoardGenerator {
 //            int movesToPlay, 
             int repetitions
     ) {
-//        Board boardCopy = b.deepCopy();
+        Board boardCopy = b.deepCopy();
 //        generateRandomBoard(boardCopy, movesToPlay);
         //Board boardCopy2 = boardCopy.deepCopy();
         
         MonteCarloSimulation sim = new MonteCarloSimulation(
-                b, 
+                boardCopy, 
                 b, 
                 b.getEmptyFields(), 
                 0, 

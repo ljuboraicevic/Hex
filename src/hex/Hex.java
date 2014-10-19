@@ -80,7 +80,6 @@ public class Hex {
                     g.play();
                 //    writer.write(g.gameStats());
                     writer.write(g.additionalGameStats(recordOnlyFirstPlayerMoves));
-                    writer.write(System.lineSeparator());
                     writer.write(g.gameStatsOfRandomMoves());
                 } catch (NullPointerException e){
                 } catch (Exception e){

@@ -23,6 +23,4 @@ public class PairBoardAndRandomMoves {
     public MCSimulationMove[] getRandomMoves() {
         return randomMoves;
     }
-    
-    
 }

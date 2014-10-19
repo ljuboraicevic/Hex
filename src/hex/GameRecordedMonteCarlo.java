@@ -90,7 +90,7 @@ public class GameRecordedMonteCarlo extends Game {
             
             //if player 1, make random moves
             if (movesPlayed % 2 == 1 && movesPlayed >= 5) {
-                randomMoves.addAll(RandomBoardGenerator.evaluateRandomBoards(board, 10000, 1, 1, 5));
+                randomMoves.addAll(RandomBoardGenerator.evaluateRandomBoards(board, 10000, 2, 1, 5));
             }
         }
 
@@ -109,6 +109,10 @@ public class GameRecordedMonteCarlo extends Game {
     public static Double normalizeProbability(double probability, double min, double max) {
         if (min != max) {
             return (probability - min) / (max - min);
+        } else if (min == 0) {
+            probability = 0.0;
+        } else {
+            probability = 1.0;
         }
         return probability;
     }
@@ -141,12 +145,41 @@ public class GameRecordedMonteCarlo extends Game {
         return sb.toString();
     }
 
+    /**
+     * Creates statistics for random moves made by RandomBoardGenerator.
+     * 
+     * @return String containing statistics in the same format as 
+     * additionalGameStats and gameStats
+     */
     public String gameStatsOfRandomMoves() {
         StringBuilder sb = new StringBuilder();
         
         for (PairBoardAndRandomMoves pair: randomMoves) {
+            //board in question
+            Board currentBoard = pair.getBoard();
             
-            //TODO
+            //moves explored for the board
+            MCSimulationMove[] exploredMoves = pair.getRandomMoves();
+            
+            //get min and max probabilities for normalization
+            double min = exploredMoves[exploredMoves.length - 1].getProbability();
+            double max = exploredMoves[0].getProbability();
+            
+            //for each move explored on this board
+            for (MCSimulationMove move: exploredMoves) {
+                //put mark
+                currentBoard.putMark(move.getCoordinates(), (byte)1);
+                
+                //append the board to stringbuilder
+                sb.append(currentBoard.toSingleRowString(false));
+                
+                //append normalized probability for this move
+                sb.append(normalizeProbability(move.getProbability(), min, max));
+                sb.append(System.lineSeparator());
+                
+                //remove mark
+                currentBoard.removeMark(move.getCoordinates());
+            }
             
         }
         
