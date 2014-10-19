@@ -82,7 +82,8 @@ public class MonteCarloSimulation extends Thread{
             Board b,
             Board originalBoard,
             Coordinate[] emptyFields, 
-            int from, int to, 
+            int from, 
+            int to, 
             int repetitions,
             int movesPlayed,
             byte player) {

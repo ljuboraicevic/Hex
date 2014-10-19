@@ -4,7 +4,11 @@ import hex.Board;
 import hex.Coordinate;
 import hex.MCSimulationMove;
 import hex.MonteCarloSimulation;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Used for generating random boards and evaluating them using Monte Carlo, 
@@ -25,18 +29,25 @@ public class RandomBoardGenerator {
      * @param toMovesToPlay
      * @return 
      */
-    public static LinkedList<MCSimulationMove[]> evaluateRandomBoards(
+    public static LinkedList<PairBoardAndRandomMoves> evaluateRandomBoards(
             Board board,
             int MonteCarloRepetitions,
             int trialRepetitions,
             int fromMovesToPlay,
             int toMovesToPlay) {
         
-        LinkedList<MCSimulationMove[]> result = new LinkedList<>();
+        LinkedList<PairBoardAndRandomMoves> result = new LinkedList<>();
         
         for (int movesToPlay = fromMovesToPlay; movesToPlay <= toMovesToPlay; movesToPlay += 2) {
             for (int iCount = 0; iCount < trialRepetitions; iCount++) {
-                result.add(generateAndEvaluateARandomBoard(board, movesToPlay, trialRepetitions));
+                //make a copy of the board
+                Board boardCopy = board.deepCopy();
+                generateRandomBoard(boardCopy, movesToPlay);
+                MCSimulationMove[] rb = generateAndEvaluateARandomBoard(boardCopy, MonteCarloRepetitions);
+                PairBoardAndRandomMoves pair = new PairBoardAndRandomMoves(boardCopy, rb);
+                
+                //add the evaluated board to the result
+                result.add(pair);
             }
         }
         
@@ -53,28 +64,33 @@ public class RandomBoardGenerator {
      */
     private static MCSimulationMove[] generateAndEvaluateARandomBoard(
             Board b, 
-            int movesToPlay, 
+//            int movesToPlay, 
             int repetitions
     ) {
-        Board boardCopy = b.deepCopy();
-        generateRandomBoard(boardCopy, movesToPlay);
-        Board boardCopy2 = boardCopy.deepCopy();
-        
-        System.out.println(boardCopy);
+//        Board boardCopy = b.deepCopy();
+//        generateRandomBoard(boardCopy, movesToPlay);
+        //Board boardCopy2 = boardCopy.deepCopy();
         
         MonteCarloSimulation sim = new MonteCarloSimulation(
-                boardCopy2, 
-                boardCopy, 
-                boardCopy.getEmptyFields(), 
+                b, 
+                b, 
+                b.getEmptyFields(), 
                 0, 
-                boardCopy.getEmptyFields().length, 
+                b.getEmptyFields().length, 
                 repetitions, 
-                boardCopy.getSize() * boardCopy.getSize() - (boardCopy.getEmptyFields().length - 1), 
-                boardCopy.whosOnTheMove());
+                b.getSize() * b.getSize() - (b.getEmptyFields().length - 1), 
+                b.whosOnTheMove());
         
         sim.start();
+        try {
+            sim.join();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(RandomBoardGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        MCSimulationMove[] result = sim.getAllMoves();
+        Arrays.sort(result, Comparator.reverseOrder());
         
-        return sim.getAllMoves();
+        return result;
     }
     
     /**
@@ -85,8 +101,6 @@ public class RandomBoardGenerator {
      */
     private static void generateRandomBoard(Board b, int movesToPlay) {
         
-        int who = b.whosOnTheMove();
-        
         for (int iCount = 0; iCount < movesToPlay; iCount++) {
             boolean moveLegal = false;
             
@@ -96,8 +110,7 @@ public class RandomBoardGenerator {
                 
                 if (b.isMoveLegal(move)) {
                     moveLegal = true;
-                    b.putMark(move, (byte)(who + 1));
-                    who = (who + 1) % 2;
+                    b.putMark(move, (byte) (b.whosOnTheMove() + 1));
                 }
             }
         }

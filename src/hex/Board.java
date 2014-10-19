@@ -162,6 +162,7 @@ public class Board {
         }
         
         result.noOfEmptyFields = this.noOfEmptyFields;
+        result.nextMovePlayer = this.nextMovePlayer;
         
         return result;
     }

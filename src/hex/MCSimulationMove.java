@@ -22,6 +22,13 @@ public class MCSimulationMove implements Comparable<MCSimulationMove> {
     }
 
     @Override
+    public String toString() {
+        return "MCSimulationMove{" + "coordinate=" + coordinate + ", probability=" + probability + '}';
+    }
+    
+    
+
+    @Override
     /**
      * used in sorting array of unplayed moves
      * 

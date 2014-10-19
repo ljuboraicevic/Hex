@@ -27,22 +27,22 @@ public class Hex {
 //            7,                                 //board size
 //            1);                                //number of games
 
-        Board b = new Board(5);
-        LinkedList<MCSimulationMove[]> r = 
-                RandomBoardGenerator.evaluateRandomBoards(b, 10, 10, 2, 6);
+//        Board b = new Board(5);
+//        b.putMark(new Coordinate(1, 1), (byte)1);
+//        LinkedList<MCSimulationMove[]> r = 
+//                RandomBoardGenerator.evaluateRandomBoards(b, 10, 1, 1, 5);
         
-//        playMonteCarloRecordedGames(
-//                10000,               //first player Monte Carlo repetitions
-//                100,                  //second player Monte Carlo repetitions
-//                7,                  //board size
-//                30,                  //number of games
-//                2,                  //paralelization
-//                "TrainingSetNonNormalized",     //file
-//                true,               //randomize best
-//                true,               //record only first players move
-//                false                //normalize probabilities
-//        );   
-////        
+        playMonteCarloRecordedGames(
+                10000,               //first player Monte Carlo repetitions
+                100,                  //second player Monte Carlo repetitions
+                7,                  //board size
+                1,                  //number of games
+                6,                  //paralelization
+                "TrainingSetNonNormalizedRandom",     //file
+                true,               //randomize best
+                true,               //record only first players move
+                false                //normalize probabilities
+        );   
     }
     
     private static void playRegularGames(
@@ -80,9 +80,11 @@ public class Hex {
                     g.play();
                 //    writer.write(g.gameStats());
                     writer.write(g.additionalGameStats(recordOnlyFirstPlayerMoves));
+                    writer.write(System.lineSeparator());
+                    writer.write(g.gameStatsOfRandomMoves());
                 } catch (NullPointerException e){
                 } catch (Exception e){
-                    System.out.println(e.getMessage());
+                    System.out.println(e);
                 }
             }
             writer.flush();

@@ -1,5 +1,7 @@
 package hex;
 
+import hex.randomboards.PairBoardAndRandomMoves;
+import hex.randomboards.RandomBoardGenerator;
 import java.util.LinkedList;
 
 /**
@@ -22,6 +24,7 @@ public class GameRecordedMonteCarlo extends Game {
      * Linked list of arrays of all possible moves with respective probabilities
      */
     protected LinkedList<MCSimulationMove[]> unplayedMoves;
+    protected LinkedList<PairBoardAndRandomMoves> randomMoves;
     /**
      * true - all probabilities of unplayed moves should be normalized false -
      * leave them unchainged
@@ -41,7 +44,8 @@ public class GameRecordedMonteCarlo extends Game {
         this.players[1] = second;
         this.moves = new LinkedList<>();
         this.probabilities = new LinkedList<>();
-        this.unplayedMoves = new LinkedList<MCSimulationMove[]>();
+        this.unplayedMoves = new LinkedList<>();
+        this.randomMoves = new LinkedList<>();
         this.normalizeProbabilities = normalizeProbabilities;
     }
 
@@ -83,6 +87,11 @@ public class GameRecordedMonteCarlo extends Game {
             movesPlayed++;
 
             winningPlayer = whoWon();
+            
+            //if player 1, make random moves
+            if (movesPlayed % 2 == 1 && movesPlayed >= 5) {
+                randomMoves.addAll(RandomBoardGenerator.evaluateRandomBoards(board, 10000, 1, 1, 5));
+            }
         }
 
         System.out.println(board);
@@ -132,13 +141,24 @@ public class GameRecordedMonteCarlo extends Game {
         return sb.toString();
     }
 
+    public String gameStatsOfRandomMoves() {
+        StringBuilder sb = new StringBuilder();
+        
+        for (PairBoardAndRandomMoves pair: randomMoves) {
+            
+            //TODO
+            
+        }
+        
+        return sb.toString();
+    }
+    
     /**
      * creating additional stats, contains moves that are played and those that
      * were not played
      *
      * @param firstPlayerOnly - should write only moves of first player - used
      * when neural network wants to learn only from one player
-     * @param normalize - should probabilities be normalized
      * @return
      * @throws Exception
      */
